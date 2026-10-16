@@ -3,17 +3,17 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
 from app.core.config import get_settings
-from app.core.mqtt import mqtt_ingest
 from app.core.redis import redis_client
 from app.db.base import Base
 from app.db.session import engine
-from app.ws.bridge import bridge_redis_to_websocket
-from app.ws.manager import manager
+from app.subsystems.ingestion.mqtt import mqtt_ingest
+from app.subsystems.realtime.bridge import bridge_redis_to_websocket
+from app.subsystems.realtime.router import router as realtime_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -56,13 +56,4 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api")
-
-
-@app.websocket("/ws/readings")
-async def readings_ws(websocket: WebSocket) -> None:
-    await manager.connect(websocket)
-    try:
-        while True:
-            await websocket.receive_text()
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
+app.include_router(realtime_router)

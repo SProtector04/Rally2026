@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { computed } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
+import AppShell from '@/layouts/AppShell.vue'
+
+const route = useRoute()
+const isBlank = computed(() => route.meta.layout === 'blank')
 </script>
 
 <template>
   <div class="min-h-screen bg-background text-foreground">
-    <header class="border-b">
-      <nav class="mx-auto flex max-w-7xl items-center gap-6 p-4">
-        <RouterLink to="/" class="text-sm font-medium">Home</RouterLink>
-        <RouterLink to="/about" class="text-sm text-muted-foreground">About</RouterLink>
-      </nav>
-    </header>
-
-    <RouterView />
+    <AppShell v-if="!isBlank">
+      <RouterView />
+    </AppShell>
+    <RouterView v-else />
   </div>
 </template>

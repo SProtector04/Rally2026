@@ -37,20 +37,43 @@ against its configured thresholds, persists it, and re-publishes it (with `id`, 
 and `timestamp`) to the `readings` Redis channel. The WebSocket bridge forwards it to
 every connected browser.
 
+## Backend subsystems
+
+Business logic is divided into eight bounded contexts under `app/subsystems/`:
+
+| # | Subsystem   | Responsibility                                                      | Status        |
+| - | ----------- | ------------------------------------------------------------------- | ------------- |
+| 1 | ingestion   | Device management; MQTT intake of telemetry, actuator states, events | Implemented   |
+| 2 | validation  | Identity, permissions, units, timestamps, duplicates, plausibility   | Partial       |
+| 3 | persistence | History, current state, traceability (PostgreSQL)                    | Implemented   |
+| 4 | rules       | Alerts, anomalies, hydraulic risk, operational policies              | Partial       |
+| 5 | commands    | Authorize, schedule, verify actuator orders                          | Stub          |
+| 6 | community   | Roles, tasks, shifts, voting, maintenance                            | Stub          |
+| 7 | realtime    | Fan-out of updates/alarms/state changes to authorized clients        | Implemented   |
+| 8 | audit       | Decisions, errors, latencies, orders, confirmations                  | Stub          |
+
+The ingest pipeline chains the subsystems in order: MQTT → validation →
+identity lookup → rules → persistence → realtime fan-out.
+
 ## Project layout
 
 ```
 Rally2026/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py              # FastAPI app + lifespan + WebSocket route
-│   │   ├── core/                # config, redis, mqtt ingest
+│   │   ├── main.py              # FastAPI app + lifespan
+│   │   ├── core/                # config, redis (cross-cutting infra)
 │   │   ├── db/                  # engine, session, Base
-│   │   ├── models/              # SQLAlchemy models (Sensor, Reading)
-│   │   ├── schemas/             # Pydantic schemas
-│   │   ├── services/            # analyzer (risk/condition classification)
-│   │   ├── api/                 # REST routes
-│   │   └── ws/                  # ConnectionManager + Redis→WS bridge
+│   │   ├── subsystems/          # business logic, split into 8 contexts
+│   │   │   ├── ingestion/       # 1. IoT device management + MQTT intake
+│   │   │   ├── validation/      # 2. identity/plausibility checks + normalization
+│   │   │   ├── persistence/     # 3. history, current state, traceability
+│   │   │   ├── rules/           # 4. alerts, anomalies, hydraulic risk
+│   │   │   ├── commands/        # 5. actuator command coordinator (stub)
+│   │   │   ├── community/       # 6. roles, tasks, shifts, votes (stub)
+│   │   │   ├── realtime/        # 7. WebSocket + Redis fan-out
+│   │   │   └── audit/           # 8. observability + audit trail (stub)
+│   │   └── api/                 # router aggregation + health
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── frontend/
@@ -124,6 +147,12 @@ to `/ws/readings`.
 - `GET  /api/sensors/{id}`
 - `GET  /api/readings?sensor_id=...&limit=...`
 - `POST /api/readings`
+
+Stubbed (return `501 Not Implemented`):
+
+- `GET /api/commands`
+- `GET /api/community`
+- `GET /api/audit`
 
 A sensor payload looks like:
 

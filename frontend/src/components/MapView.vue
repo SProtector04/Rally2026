@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { LngLatBounds, Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
-import 'maplibre-gl/dist/maplibre-gl.css'
+import { initMapLibre } from '@/lib/map'
 import type { Reading, ReadingStatus, Sensor } from '@/types/api'
 
 const props = defineProps<{
@@ -68,6 +68,7 @@ function fitToSensors() {
 
 onMounted(() => {
   if (!container.value) return
+  initMapLibre()
   map = new MapLibreMap({
     container: container.value,
     style: 'https://demotiles.maplibre.org/style.json',

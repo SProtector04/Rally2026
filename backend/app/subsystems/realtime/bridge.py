@@ -2,7 +2,7 @@ import logging
 
 from app.core.config import get_settings
 from app.core.redis import redis_client
-from app.ws.manager import manager
+from app.subsystems.realtime.manager import manager
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
