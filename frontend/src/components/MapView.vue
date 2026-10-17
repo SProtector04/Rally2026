@@ -2,6 +2,7 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { LngLatBounds, Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
 import type { GeoJSONSource } from 'maplibre-gl'
+import type * as GeoJSON from 'geojson'
 import { initMapLibre, TERRAIN_STYLE } from '@/lib/map'
 import { LA_MARAVILLA } from '@/data/mock'
 import { statusFill } from '@/lib/status'
@@ -65,7 +66,8 @@ function buildZoneGeoJSON(): GeoJSON.FeatureCollection {
     )
     const sorted = [...points].sort((a, b) => Math.atan2(a.lat - center.lat, a.lng - center.lng) - Math.atan2(b.lat - center.lat, b.lng - center.lng))
     const coords = sorted.map((p) => [p.lng, p.lat])
-    coords.push(coords[0])
+    const first = coords[0]
+    if (first) coords.push(first)
     features.push({
       type: 'Feature',
       properties: { zone },
@@ -114,9 +116,13 @@ function nearSite(lat?: number | null, lng?: number | null): boolean {
 function fitToSensors() {
   if (!map) return
   const positioned = props.sensors.filter((s) => nearSite(s.latitude, s.longitude))
-  if (positioned.length === 0) return
   const bounds = new LngLatBounds()
-  for (const s of positioned) bounds.extend([s.longitude!, s.latitude!])
+  bounds.extend([LA_MARAVILLA.lng, LA_MARAVILLA.lat])
+  for (const s of positioned) {
+    if (s.longitude != null && s.latitude != null) {
+      bounds.extend([s.longitude, s.latitude])
+    }
+  }
   map.fitBounds(bounds, { padding: 60, maxZoom: 16 })
 }
 

@@ -12,6 +12,7 @@ class SensorBase(BaseModel):
     longitude: float | None = None
     low_threshold: float | None = None
     high_threshold: float | None = None
+    zone: str | None = None
 
 
 class SensorCreate(SensorBase):

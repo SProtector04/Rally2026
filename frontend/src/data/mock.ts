@@ -69,14 +69,14 @@ export type SensorZone = (typeof SENSOR_ZONES)[number]
 
 // Distribución geográfica por zona (offsets respecto a LA_MARAVILLA)
 const ZONE_OFFSETS: Record<SensorZone, { latMin: number; latMax: number; lngMin: number; lngMax: number }> = {
-  'Corona':               { latMin: 0.0018, latMax: 0.0028, lngMin: -0.003, lngMax: 0.003 },
-  'Vertedero':            { latMin: 0.0005, latMax: 0.0015, lngMin: 0.002,  lngMax: 0.0045 },
-  'Obra de toma':         { latMin: -0.0008, latMax: 0.0005, lngMin: 0.002,  lngMax: 0.004 },
-  'Talud aguas arriba':   { latMin: 0.001,  latMax: 0.002,  lngMin: -0.0045, lngMax: -0.002 },
-  'Talud aguas abajo':    { latMin: -0.0025, latMax: -0.001, lngMin: -0.004, lngMax: -0.0015 },
-  'Cuencas tributarias':  { latMin: 0.003,  latMax: 0.005,  lngMin: -0.002, lngMax: 0.002 },
-  'Zona ambiental':       { latMin: -0.0035, latMax: -0.002, lngMin: -0.001, lngMax: 0.0015 },
-  'Embalse central':      { latMin: -0.001, latMax: 0.001,  lngMin: -0.001, lngMax: 0.001 },
+  'Corona':               { latMin: 0.0005, latMax: 0.001,  lngMin: -0.001, lngMax: 0.001 },
+  'Vertedero':            { latMin: 0.0002, latMax: 0.0008, lngMin: 0.0005, lngMax: 0.0012 },
+  'Obra de toma':         { latMin: -0.0008, latMax: -0.0002, lngMin: 0.0005, lngMax: 0.0012 },
+  'Talud aguas arriba':   { latMin: 0.0003, latMax: 0.0009, lngMin: -0.0012, lngMax: -0.0005 },
+  'Talud aguas abajo':    { latMin: -0.0009, latMax: -0.0003, lngMin: -0.0012, lngMax: -0.0005 },
+  'Cuencas tributarias':  { latMin: -0.0005, latMax: 0.0005, lngMin: -0.001, lngMax: -0.0002 },
+  'Zona ambiental':       { latMin: -0.001, latMax: -0.0005, lngMin: -0.0005, lngMax: 0.0008 },
+  'Embalse central':      { latMin: -0.0004, latMax: 0.0004, lngMin: -0.0004, lngMax: 0.0004 },
 }
 
 function zoneCoord(zone: SensorZone, seed: number): { lat: number; lng: number } {
@@ -116,61 +116,41 @@ function makeSensor(
 }
 
 export const mockSensors: Sensor[] = [
-  // ── Corona (4) ──────────────────────────────────────────────────────────────
+  // ── Corona (2) ──────────────────────────────────────────────────────────────
   makeSensor('Corona', 'Nivel boya — Corona A', 'nivel_boya', 'm', 2.5, 8.5, '2025-11-02T10:00:00Z'),
-  makeSensor('Corona', 'Nivel boya — Corona B', 'nivel_boya', 'm', 2.5, 8.5, '2025-11-02T10:00:00Z'),
-  makeSensor('Corona', 'Nivel hidrostático — Corona', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2025-11-03T10:00:00Z'),
   makeSensor('Corona', 'Turbidez — Corona', 'turbidez', 'NTU', 0, 20, '2025-11-03T10:00:00Z'),
 
-  // ── Vertedero (4) ───────────────────────────────────────────────────────────
+  // ── Vertedero (2) ───────────────────────────────────────────────────────────
   makeSensor('Vertedero', 'Nivel boya — Vertedero A', 'nivel_boya', 'm', 2.5, 8.5, '2025-11-04T10:00:00Z'),
-  makeSensor('Vertedero', 'Nivel boya — Vertedero B', 'nivel_boya', 'm', 2.5, 8.5, '2025-11-04T10:00:00Z'),
-  makeSensor('Vertedero', 'Turbidez — Vertedero', 'turbidez', 'NTU', 0, 20, '2025-11-05T10:00:00Z'),
   makeSensor('Vertedero', 'Sólidos suspendidos — Vertedero', 'solidos_suspendidos', 'mg/L', 0, 200, '2025-11-05T10:00:00Z'),
 
-  // ── Obra de toma (4) ────────────────────────────────────────────────────────
+  // ── Obra de toma (2) ────────────────────────────────────────────────────────
   makeSensor('Obra de toma', 'Nivel hidrostático — Toma A', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2025-11-06T10:00:00Z'),
-  makeSensor('Obra de toma', 'Nivel hidrostático — Toma B', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2025-11-06T10:00:00Z'),
   makeSensor('Obra de toma', 'Turbidez — Toma', 'turbidez', 'NTU', 0, 20, '2025-11-07T10:00:00Z'),
-  makeSensor('Obra de toma', 'Sólidos suspendidos — Toma', 'solidos_suspendidos', 'mg/L', 0, 200, '2025-11-07T10:00:00Z'),
 
-  // ── Talud aguas arriba (4) ──────────────────────────────────────────────────
+  // ── Talud aguas arriba (2) ──────────────────────────────────────────────────
   makeSensor('Talud aguas arriba', 'Nivel hidrostático — Talud arriba A', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2025-12-01T10:00:00Z'),
-  makeSensor('Talud aguas arriba', 'Nivel hidrostático — Talud arriba B', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2025-12-01T10:00:00Z'),
   makeSensor('Talud aguas arriba', 'Precipitación — Talud arriba', 'precipitacion', 'mm', 0, 50, '2025-12-02T10:00:00Z'),
-  makeSensor('Talud aguas arriba', 'Turbidez — Talud arriba', 'turbidez', 'NTU', 0, 20, '2025-12-02T10:00:00Z'),
 
-  // ── Talud aguas abajo (4) ───────────────────────────────────────────────────
+  // ── Talud aguas abajo (2) ───────────────────────────────────────────────────
   makeSensor('Talud aguas abajo', 'Nivel hidrostático — Talud abajo A', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2025-12-03T10:00:00Z'),
-  makeSensor('Talud aguas abajo', 'Nivel hidrostático — Talud abajo B', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2025-12-03T10:00:00Z'),
   makeSensor('Talud aguas abajo', 'Precipitación — Talud abajo', 'precipitacion', 'mm', 0, 50, '2025-12-04T10:00:00Z'),
-  makeSensor('Talud aguas abajo', 'Sólidos suspendidos — Talud abajo', 'solidos_suspendidos', 'mg/L', 0, 200, '2025-12-04T10:00:00Z'),
 
-  // ── Cuencas tributarias (6) ─────────────────────────────────────────────────
+  // ── Cuencas tributarias (3) ─────────────────────────────────────────────────
   makeSensor('Cuencas tributarias', 'Nivel boya — Arroyo norte', 'nivel_boya', 'm', 0.3, 3, '2025-12-05T10:00:00Z'),
-  makeSensor('Cuencas tributarias', 'Nivel boya — Arroyo sur', 'nivel_boya', 'm', 0.3, 3, '2025-12-05T10:00:00Z'),
   makeSensor('Cuencas tributarias', 'Precipitación — Cuenca norte', 'precipitacion', 'mm', 0, 50, '2025-12-06T10:00:00Z'),
-  makeSensor('Cuencas tributarias', 'Precipitación — Cuenca sur', 'precipitacion', 'mm', 0, 50, '2025-12-06T10:00:00Z'),
   makeSensor('Cuencas tributarias', 'Turbidez — Arroyo norte', 'turbidez', 'NTU', 0, 30, '2025-12-07T10:00:00Z'),
-  makeSensor('Cuencas tributarias', 'Turbidez — Arroyo sur', 'turbidez', 'NTU', 0, 30, '2025-12-07T10:00:00Z'),
 
-  // ── Zona ambiental (4) ──────────────────────────────────────────────────────
+  // ── Zona ambiental (2) ──────────────────────────────────────────────────────
   makeSensor('Zona ambiental', 'Precipitación — Estación meteo A', 'precipitacion', 'mm', 0, 50, '2026-01-02T10:00:00Z'),
-  makeSensor('Zona ambiental', 'Precipitación — Estación meteo B', 'precipitacion', 'mm', 0, 50, '2026-01-02T10:00:00Z'),
-  makeSensor('Zona ambiental', 'Precipitación — Márgenes', 'precipitacion', 'mm', 0, 50, '2026-01-03T10:00:00Z'),
   makeSensor('Zona ambiental', 'Nivel boya — Embalse sur', 'nivel_boya', 'm', 2.5, 8.5, '2026-01-03T10:00:00Z'),
 
-  // ── Embalse central (10) ────────────────────────────────────────────────────
+  // ── Embalse central (5) ────────────────────────────────────────────────────
   makeSensor('Embalse central', 'Nivel boya — Centro A', 'nivel_boya', 'm', 2.5, 8.5, '2026-01-04T10:00:00Z'),
   makeSensor('Embalse central', 'Nivel boya — Centro B', 'nivel_boya', 'm', 2.5, 8.5, '2026-01-04T10:00:00Z'),
-  makeSensor('Embalse central', 'Nivel boya — Centro C', 'nivel_boya', 'm', 2.5, 8.5, '2026-01-05T10:00:00Z'),
   makeSensor('Embalse central', 'Nivel hidrostático — Centro A', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2026-01-05T10:00:00Z'),
-  makeSensor('Embalse central', 'Nivel hidrostático — Centro B', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2026-01-06T10:00:00Z'),
   makeSensor('Embalse central', 'Turbidez — Centro A', 'turbidez', 'NTU', 0, 20, '2026-01-06T10:00:00Z'),
-  makeSensor('Embalse central', 'Turbidez — Centro B', 'turbidez', 'NTU', 0, 20, '2026-01-07T10:00:00Z'),
   makeSensor('Embalse central', 'Sólidos suspendidos — Centro A', 'solidos_suspendidos', 'mg/L', 0, 200, '2026-01-07T10:00:00Z'),
-  makeSensor('Embalse central', 'Sólidos suspendidos — Centro B', 'solidos_suspendidos', 'mg/L', 0, 200, '2026-01-08T10:00:00Z'),
-  makeSensor('Embalse central', 'Sólidos suspendidos — Centro C', 'solidos_suspendidos', 'mg/L', 0, 200, '2026-01-08T10:00:00Z'),
 ]
 
 // ─── Actuators ───────────────────────────────────────────────────────────────

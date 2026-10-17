@@ -18,6 +18,7 @@ class Sensor(Base):
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     low_threshold: Mapped[float | None] = mapped_column(Float, nullable=True)
     high_threshold: Mapped[float | None] = mapped_column(Float, nullable=True)
+    zone: Mapped[str | None] = mapped_column(String(50), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

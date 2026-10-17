@@ -11,6 +11,7 @@ from apps.realtime.bridge import bridge_redis_to_websocket
 from apps.realtime.urls import router as realtime_router
 from config.db import Base, engine
 from config.redis import redis_client
+from config.seed import seed_database
 from config.settings import get_settings
 from config.urls import api_router
 
@@ -24,6 +25,8 @@ settings = get_settings()
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    await seed_database()
 
     tasks = [
         asyncio.create_task(mqtt_ingest()),
