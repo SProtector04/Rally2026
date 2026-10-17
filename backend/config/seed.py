@@ -2,13 +2,13 @@
 
 Populates the sensor table (new restricted taxonomy + zones) and a small
 time-series of readings per sensor so the dashboard and map render populated
-out of the box. Idempotent: runs only when the sensors table is empty.
+out of the box. Reconciles the demo fleet when the seed version changes.
 """
 import math
 import random
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select, text
 
 from apps.ingestion.models import Sensor
 from apps.persistence.models import Reading
@@ -32,36 +32,27 @@ ZONE_OFFSETS = {
 }
 
 # (zone, name, type, unit, low, high)
-# 20 sensors — at least 2 per zone (needed for dotted-line integration).
+# 11 sensors — all zones remain represented in the demo fleet.
 SENSOR_SPECS = [
     # ── Corona (2) ────────────────────────────────────────────────────────────
     ("Corona", "Nivel boya — Corona A", "nivel_boya", "m", 2.5, 8.5),
     ("Corona", "Turbidez — Corona", "turbidez", "NTU", 0.0, 20.0),
     # ── Vertedero (2) ─────────────────────────────────────────────────────────
     ("Vertedero", "Nivel boya — Vertedero A", "nivel_boya", "m", 2.5, 8.5),
-    ("Vertedero", "Sólidos suspendidos — Vertedero", "solidos_suspendidos", "mg/L", 0.0, 200.0),
     # ── Obra de toma (2) ──────────────────────────────────────────────────────
     ("Obra de toma", "Nivel hidrostático — Toma A", "nivel_hidrostatico", "m", 2.5, 8.5),
     ("Obra de toma", "Turbidez — Toma", "turbidez", "NTU", 0.0, 20.0),
-    # ── Talud aguas arriba (2) ────────────────────────────────────────────────
+    # ── Talud aguas arriba (1) ────────────────────────────────────────────────
     ("Talud aguas arriba", "Nivel hidrostático — Talud arriba A", "nivel_hidrostatico", "m", 2.5, 8.5),
-    ("Talud aguas arriba", "Precipitación — Talud arriba", "precipitacion", "mm", 0.0, 50.0),
-    # ── Talud aguas abajo (2) ─────────────────────────────────────────────────
+    # ── Talud aguas abajo (1) ─────────────────────────────────────────────────
     ("Talud aguas abajo", "Nivel hidrostático — Talud abajo A", "nivel_hidrostatico", "m", 2.5, 8.5),
-    ("Talud aguas abajo", "Precipitación — Talud abajo", "precipitacion", "mm", 0.0, 50.0),
-    # ── Cuencas tributarias (3) ───────────────────────────────────────────────
+    # ── Cuencas tributarias (1) ───────────────────────────────────────────────
     ("Cuencas tributarias", "Nivel boya — Arroyo norte", "nivel_boya", "m", 0.3, 3.0),
-    ("Cuencas tributarias", "Precipitación — Cuenca norte", "precipitacion", "mm", 0.0, 50.0),
-    ("Cuencas tributarias", "Turbidez — Arroyo norte", "turbidez", "NTU", 0.0, 30.0),
-    # ── Zona ambiental (2) ────────────────────────────────────────────────────
+    # ── Zona ambiental (1) ────────────────────────────────────────────────────
     ("Zona ambiental", "Precipitación — Estación meteo A", "precipitacion", "mm", 0.0, 50.0),
-    ("Zona ambiental", "Nivel boya — Embalse sur", "nivel_boya", "m", 2.5, 8.5),
-    # ── Embalse central (5) ───────────────────────────────────────────────────
+    # ── Embalse central (2) ───────────────────────────────────────────────────
     ("Embalse central", "Nivel boya — Centro A", "nivel_boya", "m", 2.5, 8.5),
     ("Embalse central", "Nivel boya — Centro B", "nivel_boya", "m", 2.5, 8.5),
-    ("Embalse central", "Nivel hidrostático — Centro A", "nivel_hidrostatico", "m", 2.5, 8.5),
-    ("Embalse central", "Turbidez — Centro A", "turbidez", "NTU", 0.0, 20.0),
-    ("Embalse central", "Sólidos suspendidos — Centro A", "solidos_suspendidos", "mg/L", 0.0, 200.0),
 ]
 
 # noise and rain_spike are expressed as fractions of the high threshold, so a
@@ -71,15 +62,15 @@ SENSOR_PROFILES = {
     "nivel_hidrostatico": {"noise": 0.015, "rain_spike": 0.08},
     "precipitacion": {"noise": 0.02, "rain_spike": 0.36},
     "turbidez": {"noise": 0.06, "rain_spike": 0.6},
-    "solidos_suspendidos": {"noise": 0.03, "rain_spike": 0.25},
 }
 
 READINGS_PER_SENSOR = 24
 READING_INTERVAL_MIN = 5
+SEED_VERSION = "3"
 
-# Latest-reading target levels as a fraction of the high threshold, so the
-# dashboard shows a healthy mix: ok / ok / ok / ok / warning / warning / alert.
-LATEST_TARGETS = [0.62, 0.70, 0.78, 0.85, 0.93, 0.96, 1.10]
+# Latest-reading target levels as a fraction of the high threshold. The final
+# three targets intentionally exercise ok, warning and alert KPI states.
+LATEST_TARGETS = [0.50, 0.56, 0.62, 0.68, 0.74, 0.80, 0.86, 0.92, 1.05, 0.96, 0.72]
 
 
 def _zone_coords(zone: str, idx: int) -> tuple[float, float]:
@@ -92,7 +83,7 @@ def _zone_coords(zone: str, idx: int) -> tuple[float, float]:
 
 
 def _phase_for_target(target: float) -> float:
-    """Phase such that the sweep ends exactly at ``target`` on the last sample."""
+    """Phase for the deterministic historical sweep."""
     return math.asin(max(-1.0, min(1.0, (target - 0.6) / 0.5)))
 
 
@@ -100,13 +91,15 @@ def _reading_value(profile: dict, low: float | None, high: float | None, i: int,
     rng = random.Random(20260115 + i * 1000 + j)
     scale = high if high else 50.0
 
-    # One full sinusoidal sweep across the window so every sensor traverses
-    # ok -> warning -> alert over its history. The phase pins the final sample
-    # (j == READINGS_PER_SENSOR - 1) to the target state.
+    # The final sample is explicit so the dashboard always displays the same
+    # deterministic mix of healthy, warning and failed measurements.
     target = LATEST_TARGETS[i % len(LATEST_TARGETS)]
+    if j == READINGS_PER_SENSOR - 1:
+        return round(scale * target, 1)
+
     phase = _phase_for_target(target)
     progress = j / (READINGS_PER_SENSOR - 1)
-    level = 0.6 + 0.5 * math.sin(2 * math.pi * progress + phase)
+    level = 0.6 + 0.15 * math.sin(2 * math.pi * progress + phase)
 
     if profile.get("rain_spike") and j % 8 == 5:
         level += profile["rain_spike"] * (0.5 + rng.random())
@@ -114,15 +107,35 @@ def _reading_value(profile: dict, low: float | None, high: float | None, i: int,
 
     value = scale * max(0.0, level)
     lo = (low * 0.5) if low is not None else 0.0
-    hi = (high * 1.4) if high is not None else value + 10.0
+    hi = (high * 1.15) if high is not None else value + 10.0
     return round(max(lo, min(hi, value)), 1)
 
 
 async def seed_database() -> None:
     async with async_session_factory() as session:
+        await session.execute(
+            text(
+                "CREATE TABLE IF NOT EXISTS hydropix_seed_metadata "
+                "(key VARCHAR(50) PRIMARY KEY, value VARCHAR(50) NOT NULL)"
+            )
+        )
+        version_result = await session.execute(
+            text(
+                "SELECT value FROM hydropix_seed_metadata "
+                "WHERE key = 'seed_version'"
+            )
+        )
+        seed_version = version_result.scalar_one_or_none()
         existing = await session.execute(select(func.count(Sensor.id)))
-        if (existing.scalar_one() or 0) > 0:
+        sensor_count = existing.scalar_one() or 0
+        if sensor_count == len(SENSOR_SPECS) and seed_version == SEED_VERSION:
             return
+        if sensor_count > 0 or seed_version is not None:
+            # Replace the previous demo fleet so stale sensors/readings do not
+            # remain after a seed configuration change.
+            await session.execute(delete(Reading))
+            await session.execute(delete(Sensor))
+            await session.flush()
 
         now = datetime.now(timezone.utc)
         sensors: list[Sensor] = []
@@ -153,4 +166,12 @@ async def seed_database() -> None:
                 ts = now - timedelta(minutes=(READINGS_PER_SENSOR - j) * READING_INTERVAL_MIN)
                 session.add(Reading(sensor_id=sensor.id, value=value, status=status, timestamp=ts))
 
+        await session.execute(
+            text(
+                "INSERT INTO hydropix_seed_metadata (key, value) "
+                "VALUES ('seed_version', :version) "
+                "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value"
+            ),
+            {"version": SEED_VERSION},
+        )
         await session.commit()

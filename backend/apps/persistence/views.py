@@ -5,8 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.ingestion.repository import get_sensor
 from apps.persistence.models import Reading
-from apps.persistence.repository import create_reading, list_readings
-from apps.persistence.schemas import ReadingCreate
+from apps.persistence.repository import (
+    create_reading,
+    get_reading,
+    list_readings,
+    update_reading,
+)
+from apps.persistence.schemas import ReadingCreate, ReadingUpdate
 from apps.rules.services import classify
 from config.db import get_db
 
@@ -26,5 +31,33 @@ async def create_reading_endpoint(
     if sensor is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensor not found")
 
-    status_value = classify(payload.value, sensor.low_threshold, sensor.high_threshold)
-    return await create_reading(db, payload.sensor_id, payload.value, status_value)
+    status_value = payload.status or classify(payload.value, sensor.low_threshold, sensor.high_threshold)
+    return await create_reading(
+        db,
+        payload.sensor_id,
+        payload.value,
+        status_value,
+        payload.timestamp,
+    )
+
+
+async def update_reading_endpoint(
+    reading_id: int,
+    payload: ReadingUpdate,
+    db: AsyncSession = Depends(get_db),
+) -> Reading:
+    reading = await get_reading(db, reading_id)
+    if reading is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reading not found")
+
+    if payload.sensor_id is not None and await get_sensor(db, payload.sensor_id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensor not found")
+
+    return await update_reading(
+        db,
+        reading,
+        sensor_id=payload.sensor_id,
+        value=payload.value,
+        status=payload.status,
+        timestamp=payload.timestamp,
+    )

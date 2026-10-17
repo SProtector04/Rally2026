@@ -124,14 +124,6 @@
   --sidebar-border: #d2e3e2;
   --sidebar-ring: #3c8ca7;
 
-  --gradient-brand: linear-gradient(135deg, #3c8ca7 0%, #48817a 50%, #34a426 100%);
-  --gradient-hero: linear-gradient(145deg, #275b6d 0%, #3c8ca7 45%, #34a426 100%);
-  --gradient-soft: linear-gradient(135deg, #e8f1f4 0%, #e3efe9 50%, #def0dc 100%);
-  --gradient-card: linear-gradient(180deg, #ffffff 0%, #eef6f4 100%);
-  --gradient-ring: linear-gradient(90deg, #3c8ca7 0%, #48817a 50%, #34a426 100%);
-  --gradient-surface: linear-gradient(160deg, #f1f8f7 0%, #e9f4ec 100%);
-  --gradient-brand-soft: linear-gradient(135deg, rgba(60, 140, 167, 0.15) 0%, rgba(52, 164, 38, 0.15) 100%);
-  --gradient-glow: radial-gradient(60% 60% at 50% 50%, rgba(60, 140, 167, 0.25) 0%, rgba(52, 164, 38, 0) 100%);
 }
 
 .dark {
@@ -168,14 +160,6 @@
   --sidebar-border: #224a47;
   --sidebar-ring: #48817a;
 
-  --gradient-brand: linear-gradient(135deg, #5fb2c9 0%, #62a99f 50%, #7bc472 100%);
-  --gradient-hero: linear-gradient(145deg, #123e4c 0%, #3c8ca7 45%, #34a426 100%);
-  --gradient-soft: linear-gradient(135deg, #123e4c 0%, #11302e 55%, #143c33 100%);
-  --gradient-card: linear-gradient(180deg, #11302e 0%, #0e2624 100%);
-  --gradient-ring: linear-gradient(90deg, #5fb2c9 0%, #62a99f 50%, #7bc472 100%);
-  --gradient-surface: linear-gradient(160deg, #0b1e1d 0%, #0e2624 100%);
-  --gradient-brand-soft: linear-gradient(135deg, rgba(95, 178, 201, 0.15) 0%, rgba(123, 196, 114, 0.15) 100%);
-  --gradient-glow: radial-gradient(60% 60% at 50% 50%, rgba(95, 178, 201, 0.2) 0%, rgba(123, 196, 114, 0) 100%);
 }
 
 @layer base {
@@ -194,6 +178,12 @@
   }
 }
 
+.maplibregl-popup-content,
+.maplibregl-popup-content strong,
+.maplibregl-popup-content span {
+  color: #000;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -205,34 +195,50 @@
   }
 }
 
-@utility bg-gradient-brand {
-  background-image: var(--gradient-brand);
+@utility bg-brand {
+  background-color: var(--primary);
 }
-@utility bg-gradient-hero {
-  background-image: var(--gradient-hero);
+@utility bg-hero {
+  background-color: #275b6d;
 }
-@utility bg-gradient-soft {
-  background-image: var(--gradient-soft);
+@utility bg-soft {
+  background-color: var(--accent);
 }
-@utility bg-gradient-card {
-  background-image: var(--gradient-card);
+@utility bg-card-flat {
+  background-color: var(--card);
 }
-@utility bg-gradient-ring {
-  background-image: var(--gradient-ring);
+@utility bg-ring-flat {
+  background-color: var(--primary);
 }
-@utility bg-gradient-surface {
-  background-image: var(--gradient-surface);
+@utility bg-surface-flat {
+  background-color: var(--background);
 }
-@utility bg-gradient-brand-soft {
-  background-image: var(--gradient-brand-soft);
+@utility bg-brand-soft {
+  background-color: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 @utility bg-glow {
-  background-image: var(--gradient-glow);
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
 }
-@utility text-gradient-brand {
-  background-image: var(--gradient-brand);
-  background-clip: text;
-  color: transparent;
+@utility text-brand {
+  color: var(--primary);
+}
+
+.page-enter {
+  animation: page-enter 420ms ease-out both;
+}
+
+.section-enter {
+  animation: section-enter 500ms ease-out both;
+}
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes section-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Print styles for PDF export of tables */

@@ -55,7 +55,7 @@ function entriesForDay(d: number) {
     <Card>
       <CardContent class="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div
-          class="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-brand text-xl font-semibold text-white"
+          class="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-brand text-xl font-semibold text-white"
         >
           {{ initials }}
         </div>
@@ -65,7 +65,7 @@ function entriesForDay(d: number) {
         </div>
         <div class="flex flex-col items-start gap-1 sm:items-end">
           <span
-            class="rounded-full bg-gradient-brand-soft px-3 py-1 text-xs font-medium text-primary"
+            class="rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-primary"
           >
             {{ roleLabel }}
           </span>

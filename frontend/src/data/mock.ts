@@ -122,7 +122,6 @@ export const mockSensors: Sensor[] = [
 
   // ── Vertedero (2) ───────────────────────────────────────────────────────────
   makeSensor('Vertedero', 'Nivel boya — Vertedero A', 'nivel_boya', 'm', 2.5, 8.5, '2025-11-04T10:00:00Z'),
-  makeSensor('Vertedero', 'Sólidos suspendidos — Vertedero', 'solidos_suspendidos', 'mg/L', 0, 200, '2025-11-05T10:00:00Z'),
 
   // ── Obra de toma (2) ────────────────────────────────────────────────────────
   makeSensor('Obra de toma', 'Nivel hidrostático — Toma A', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2025-11-06T10:00:00Z'),
@@ -130,27 +129,19 @@ export const mockSensors: Sensor[] = [
 
   // ── Talud aguas arriba (2) ──────────────────────────────────────────────────
   makeSensor('Talud aguas arriba', 'Nivel hidrostático — Talud arriba A', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2025-12-01T10:00:00Z'),
-  makeSensor('Talud aguas arriba', 'Precipitación — Talud arriba', 'precipitacion', 'mm', 0, 50, '2025-12-02T10:00:00Z'),
 
   // ── Talud aguas abajo (2) ───────────────────────────────────────────────────
   makeSensor('Talud aguas abajo', 'Nivel hidrostático — Talud abajo A', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2025-12-03T10:00:00Z'),
-  makeSensor('Talud aguas abajo', 'Precipitación — Talud abajo', 'precipitacion', 'mm', 0, 50, '2025-12-04T10:00:00Z'),
 
   // ── Cuencas tributarias (3) ─────────────────────────────────────────────────
   makeSensor('Cuencas tributarias', 'Nivel boya — Arroyo norte', 'nivel_boya', 'm', 0.3, 3, '2025-12-05T10:00:00Z'),
-  makeSensor('Cuencas tributarias', 'Precipitación — Cuenca norte', 'precipitacion', 'mm', 0, 50, '2025-12-06T10:00:00Z'),
-  makeSensor('Cuencas tributarias', 'Turbidez — Arroyo norte', 'turbidez', 'NTU', 0, 30, '2025-12-07T10:00:00Z'),
 
   // ── Zona ambiental (2) ──────────────────────────────────────────────────────
   makeSensor('Zona ambiental', 'Precipitación — Estación meteo A', 'precipitacion', 'mm', 0, 50, '2026-01-02T10:00:00Z'),
-  makeSensor('Zona ambiental', 'Nivel boya — Embalse sur', 'nivel_boya', 'm', 2.5, 8.5, '2026-01-03T10:00:00Z'),
 
   // ── Embalse central (5) ────────────────────────────────────────────────────
   makeSensor('Embalse central', 'Nivel boya — Centro A', 'nivel_boya', 'm', 2.5, 8.5, '2026-01-04T10:00:00Z'),
   makeSensor('Embalse central', 'Nivel boya — Centro B', 'nivel_boya', 'm', 2.5, 8.5, '2026-01-04T10:00:00Z'),
-  makeSensor('Embalse central', 'Nivel hidrostático — Centro A', 'nivel_hidrostatico', 'm', 2.5, 8.5, '2026-01-05T10:00:00Z'),
-  makeSensor('Embalse central', 'Turbidez — Centro A', 'turbidez', 'NTU', 0, 20, '2026-01-06T10:00:00Z'),
-  makeSensor('Embalse central', 'Sólidos suspendidos — Centro A', 'solidos_suspendidos', 'mg/L', 0, 200, '2026-01-07T10:00:00Z'),
 ]
 
 // ─── Actuators ───────────────────────────────────────────────────────────────
@@ -303,7 +294,7 @@ export const mockReadings: Reading[] = generateReadings()
 export const seedUsers: User[] = [
   {
     id: 'u-001',
-    name: 'Valentina Ruiz',
+    name: 'Adrian Lainez',
     email: 'admin@hydropix.ar',
     role: 'admin',
     active: true,
@@ -311,7 +302,7 @@ export const seedUsers: User[] = [
   },
   {
     id: 'u-002',
-    name: 'Mateo Costa',
+    name: 'Toval Ruiz',
     email: 'voluntario@hydropix.ar',
     role: 'volunteer',
     active: true,
@@ -364,7 +355,7 @@ export const seedUsers: User[] = [
 export const seedPosts: ForumPost[] = [
   {
     id: 'p-001',
-    author: 'Valentina Ruiz',
+    author: 'Adrian Lainez',
     title: 'Plan de mantenimiento de compuertas para marzo',
     body: 'Propongo coordinar el mantenimiento preventivo de las compuertas norte y sur durante la primera semana de marzo, antes de la temporada de lluvias.',
     type: 'proposal',
@@ -375,7 +366,7 @@ export const seedPosts: ForumPost[] = [
   },
   {
     id: 'p-002',
-    author: 'Mateo Costa',
+    author: 'Toval Ruiz',
     title: '¿Cómo se calibra el sensor de turbidez óptico?',
     body: 'El sensor de turbidez óptico del sector este marca valores anómalos. ¿Alguien tiene documentado el procedimiento de calibración del sensor óptico?',
     type: 'qa',

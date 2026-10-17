@@ -89,7 +89,7 @@ function addUser() {
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-3">
                     <div
-                      class="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-brand text-xs font-semibold text-white"
+                      class="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-semibold text-white"
                     >
                       {{ user.name.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase() }}
                     </div>

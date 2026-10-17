@@ -51,9 +51,13 @@ const features = [
       <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
         <div class="flex items-center gap-2.5">
           <div
-            class="flex size-9 items-center justify-center rounded-xl bg-gradient-brand text-white"
+            class="flex size-25 items-center justify-center text-white"
           >
-            <img src="/HIDROPIX.svg" alt="Hydropix" class="size-5 object-contain" />
+            <img
+              src="/HIDROPIX.svg"
+              alt="Hydropix"
+              class="size-25 object-contain brightness-0 transition-[filter] duration-200 dark:brightness-100"
+            />
           </div>
           <span class="text-lg font-semibold tracking-tight">Hydropix</span>
         </div>
@@ -77,7 +81,7 @@ const features = [
 
     <main class="flex-1">
       <section
-        class="relative overflow-hidden bg-gradient-hero"
+        class="relative overflow-hidden bg-hero"
       >
         <div class="mx-auto max-w-6xl px-4 py-20 text-white md:px-6 md:py-28">
           <div class="max-w-2xl">
@@ -127,7 +131,7 @@ const features = [
             class="group rounded-2xl border bg-card p-6 ring-1 ring-border transition-shadow hover:shadow-md"
           >
             <div
-              class="flex size-11 items-center justify-center rounded-xl bg-gradient-brand-soft text-primary"
+              class="flex size-11 items-center justify-center rounded-xl bg-brand-soft text-primary"
             >
               <component :is="feature.icon" class="size-6" />
             </div>
@@ -185,7 +189,11 @@ const features = [
     <footer class="border-t bg-card">
       <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-muted-foreground md:flex-row md:px-6">
         <div class="flex items-center gap-2">
-          <img src="/HIDROPIX.svg" alt="Hydropix" class="size-4 object-contain" />
+          <img
+            src="/HIDROPIX.svg"
+            alt="Hydropix"
+            class="size-4 object-contain brightness-0 transition-[filter] duration-200 dark:brightness-100"
+          />
           <span>Hydropix</span>
         </div>
         <p>Plataforma de monitoreo ambiental · 2026</p>

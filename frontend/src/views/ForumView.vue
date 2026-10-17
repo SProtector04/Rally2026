@@ -230,7 +230,7 @@ function pollPercent(votes: number, total: number): number {
                 </div>
                 <div class="h-2 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    class="h-full rounded-full bg-gradient-brand transition-all"
+                    class="h-full rounded-full bg-brand transition-[width]"
                     :style="{ width: `${pollPercent(option.votes, pollTotal(poll))}%` }"
                   />
                 </div>

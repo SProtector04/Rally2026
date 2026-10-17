@@ -31,6 +31,33 @@ export function listReadings(sensorId?: string, limit = 100): Promise<Reading[]>
   return request<Reading[]>(`/api/readings?${params.toString()}`)
 }
 
+export function createReading(payload: {
+  sensor_id: string
+  value: number
+  timestamp?: string
+  status?: Reading['status']
+}): Promise<Reading> {
+  return request<Reading>('/api/readings', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function updateReading(
+  id: number,
+  payload: Partial<{
+    sensor_id: string
+    value: number
+    timestamp: string
+    status: Reading['status']
+  }>,
+): Promise<Reading> {
+  return request<Reading>(`/api/readings/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function readingsWebSocketUrl(): string {
   const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
   return `${protocol}://${window.location.host}/ws/readings`

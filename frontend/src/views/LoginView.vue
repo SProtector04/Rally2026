@@ -40,11 +40,15 @@ function quickLogin(demoEmail: string) {
     </div>
 
     <div
-      class="relative hidden flex-1 flex-col justify-between overflow-hidden bg-gradient-hero p-10 text-white lg:flex"
+      class="relative hidden flex-1 flex-col justify-between overflow-hidden bg-hero p-10 text-white lg:flex"
     >
       <div class="flex items-center gap-2.5">
-        <div class="flex size-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
-          <img src="/HIDROPIX.svg" alt="Hydropix" class="size-5 object-contain" />
+        <div class="flex size-25 items-center justify-center backdrop-blur">
+          <img
+            src="/HIDROPIX.svg"
+            alt="Hydropix"
+            class="size-25 object-contain"
+          />
         </div>
         <span class="text-xl font-semibold tracking-tight">Hydropix</span>
       </div>
@@ -62,8 +66,12 @@ function quickLogin(demoEmail: string) {
     <div class="flex flex-1 items-center justify-center px-4 py-10">
       <div class="w-full max-w-sm">
         <div class="mb-8 flex items-center gap-2.5 lg:hidden">
-          <div class="flex size-10 items-center justify-center rounded-xl bg-gradient-brand text-white">
-            <img src="/HIDROPIX.svg" alt="Hydropix" class="size-5 object-contain" />
+          <div class="flex size-25 items-center justify-center text-white">
+            <img
+              src="/HIDROPIX.svg"
+              alt="Hydropix"
+              class="size-15 object-contain brightness-0 transition-[filter] duration-200 dark:brightness-100"
+            />
           </div>
           <span class="text-xl font-semibold tracking-tight">Hydropix</span>
         </div>

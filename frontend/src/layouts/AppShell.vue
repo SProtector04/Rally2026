@@ -74,25 +74,29 @@ watch(
 </script>
 
 <template>
-  <div class="min-h-screen lg:flex">
+  <div class="min-h-svh lg:flex">
     <!-- Backdrop (mobile) -->
     <div
       v-if="open"
-      class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+      class="fixed inset-0 z-40 bg-black/40 lg:hidden"
       @click="open = false"
     />
 
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 lg:static lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-sidebar transition-transform duration-300 lg:static lg:translate-x-0',
         open ? 'translate-x-0' : '-translate-x-full',
       ]"
     >
       <!-- Brand -->
       <div class="flex items-center gap-2.5 px-5 py-5">
-        <div class="flex size-9 items-center justify-center rounded-xl bg-gradient-brand text-white">
-          <img src="/HIDROPIX.svg" alt="Hydropix" class="size-5 object-contain" />
+        <div class="flex size-25 items-center justify-center text-white">
+          <img
+            src="/HIDROPIX.svg"
+            alt="Hydropix"
+            class="size-25 object-contain brightness-0 transition-[filter] duration-200 dark:brightness-100"
+          />
         </div>
         <div class="flex-1">
           <p class="text-base font-semibold leading-tight tracking-tight">Hydropix</p>
@@ -114,7 +118,7 @@ watch(
           :key="item.to"
           :to="item.to"
           class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          active-class="bg-gradient-brand-soft text-primary"
+          active-class="bg-brand-soft text-primary"
         >
           <component :is="item.icon" class="size-5" />
           {{ item.label }}
@@ -122,10 +126,10 @@ watch(
       </nav>
 
       <!-- User + actions -->
-      <div class="border-t border-sidebar-border p-3">
+      <div class="bg-muted/40 p-3">
         <div class="flex items-center gap-3 rounded-lg px-2 py-2">
           <div
-            class="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-brand text-sm font-semibold text-white"
+            class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-semibold text-white"
           >
             {{ initials }}
           </div>
@@ -157,9 +161,9 @@ watch(
     </aside>
 
     <!-- Main column -->
-    <div class="flex min-h-screen flex-1 flex-col">
+    <div class="flex min-h-svh flex-1 flex-col">
       <header
-        class="sticky top-0 z-30 mx-3 mt-3 flex items-center gap-3 rounded-2xl border border-sidebar-border bg-background/80 px-4 py-3 backdrop-blur lg:hidden"
+        class="sticky top-0 z-30 mx-3 mt-3 flex items-center gap-3 rounded-2xl bg-background px-4 py-3 lg:hidden"
       >
         <button
           class="rounded-md p-2 text-muted-foreground hover:bg-muted"
@@ -169,14 +173,18 @@ watch(
           <Menu class="size-5" />
         </button>
         <div class="flex items-center gap-2">
-          <div class="flex size-7 items-center justify-center rounded-lg bg-gradient-brand text-white">
-            <img src="/HIDROPIX.svg" alt="Hydropix" class="size-4 object-contain" />
+          <div class="flex size-25 items-center justify-center text-white">
+            <img
+              src="/HIDROPIX.svg"
+              alt="Hydropix"
+              class="size-15 object-contain brightness-0 transition-[filter] duration-200 dark:brightness-100"
+            />
           </div>
           <span class="font-semibold tracking-tight">Hydropix</span>
         </div>
         <div class="ml-auto flex items-center gap-1">
           <div
-            class="flex size-8 items-center justify-center rounded-full bg-gradient-brand text-xs font-semibold text-white"
+            class="flex size-8 items-center justify-center rounded-full bg-brand text-xs font-semibold text-white"
           >
             {{ initials }}
           </div>

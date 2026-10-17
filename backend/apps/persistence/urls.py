@@ -19,3 +19,10 @@ router.add_api_route(
     response_model=ReadingRead,
     status_code=status.HTTP_201_CREATED,
 )
+
+router.add_api_route(
+    "/{reading_id}",
+    views.update_reading_endpoint,
+    methods=["PATCH"],
+    response_model=ReadingRead,
+)
