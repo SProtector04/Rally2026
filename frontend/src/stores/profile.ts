@@ -3,8 +3,8 @@ import { defineStore } from 'pinia'
 import type { AlertPreference, ScheduleEntry } from '@/types/domain'
 import { seedAlertPrefs, seedSchedule } from '@/data/mock'
 
-const SCHEDULE_KEY = 'rally.profile.schedule'
-const ALERTS_KEY = 'rally.profile.alerts'
+const SCHEDULE_KEY = 'hydropix.profile.schedule'
+const ALERTS_KEY = 'hydropix.profile.alerts'
 
 function load<T>(key: string, seed: T[]): T[] {
   try {

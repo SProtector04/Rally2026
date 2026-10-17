@@ -108,7 +108,7 @@ function formatTimestamp(iso: string): string {
 function downloadPdf() {
   downloadTablePdf(
     'Registro histórico de lecturas',
-    'Data conservada del reservorio · Rally2026',
+    'Data conservada del reservorio · Hydropix',
     ['Fecha y hora', 'Sensor', 'Valor', 'Estado'],
     filteredRows.value.map((r) => [
       formatTimestamp(r.timestamp),

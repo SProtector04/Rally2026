@@ -3,8 +3,8 @@ import { defineStore } from 'pinia'
 import type { Role, User } from '@/types/domain'
 import { seedUsers } from '@/data/mock'
 
-const USER_KEY = 'rally.auth.user'
-const USERS_KEY = 'rally.auth.users'
+const USER_KEY = 'hydropix.auth.user'
+const USERS_KEY = 'hydropix.auth.users'
 
 function loadUsers(): User[] {
   try {

@@ -20,12 +20,12 @@ export function downloadTablePdf(
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
 
-  doc.setFillColor(2, 132, 199)
+  doc.setFillColor(60, 140, 167)
   doc.rect(0, 0, pageWidth, 22, 'F')
   doc.setTextColor(255, 255, 255)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(14)
-  doc.text('Rally2026', 14, 12)
+  doc.text('Hydropix', 14, 12)
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
   doc.text('Plataforma de monitoreo ambiental', 14, 18)
@@ -46,7 +46,7 @@ export function downloadTablePdf(
     body: rows,
     theme: 'grid',
     styles: { font: 'helvetica', fontSize: 8.5, cellPadding: 2.5, overflow: 'linebreak' },
-    headStyles: { fillColor: [224, 242, 254], textColor: [7, 89, 133], fontStyle: 'bold' },
+    headStyles: { fillColor: [232, 241, 244], textColor: [39, 91, 109], fontStyle: 'bold' },
     alternateRowStyles: { fillColor: [241, 248, 247] },
     didParseCell: (data) => {
       if (

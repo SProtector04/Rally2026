@@ -3,15 +3,15 @@ services:
     image: postgres:18-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-rally}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rally}
-      POSTGRES_DB: ${POSTGRES_DB:-rally}
+      POSTGRES_USER: ${POSTGRES_USER:-hydropix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hydropix}
+      POSTGRES_DB: ${POSTGRES_DB:-hydropix}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rally} -d ${POSTGRES_DB:-rally}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hydropix} -d ${POSTGRES_DB:-hydropix}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -40,7 +40,7 @@ services:
     build: ./backend
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-rally}:${POSTGRES_PASSWORD:-rally}@postgres:5432/${POSTGRES_DB:-rally}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-hydropix}:${POSTGRES_PASSWORD:-hydropix}@postgres:5432/${POSTGRES_DB:-hydropix}
       REDIS_URL: redis://redis:6379/0
       MQTT_HOST: mosquitto
       MQTT_PORT: "1883"

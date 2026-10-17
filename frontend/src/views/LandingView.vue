@@ -55,7 +55,7 @@ const features = [
           >
             <Leaf class="size-5" />
           </div>
-          <span class="text-lg font-semibold tracking-tight">Rally2026</span>
+          <span class="text-lg font-semibold tracking-tight">Hydropix</span>
         </div>
         <nav class="flex items-center gap-2">
           <RouterLink
@@ -90,7 +90,7 @@ const features = [
               Cuidamos el reservorio, juntos y en tiempo real.
             </h1>
             <p class="mt-4 text-lg text-sky-50/90">
-              Rally2026 integra sensores y actuadores para monitorear, colaborar y tomar
+              Hydropix integra sensores y actuadores para monitorear, colaborar y tomar
               decisiones con datos confiables.
             </p>
             <div class="mt-8 flex flex-wrap gap-3">
@@ -185,7 +185,7 @@ const features = [
       <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-muted-foreground md:flex-row md:px-6">
         <div class="flex items-center gap-2">
           <Leaf class="size-4 text-emerald-500" />
-          <span>Rally2026</span>
+          <span>Hydropix</span>
         </div>
         <p>Plataforma de monitoreo ambiental · 2026</p>
       </div>

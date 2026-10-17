@@ -156,7 +156,7 @@ function addUser() {
             <input
               v-model="email"
               type="email"
-              placeholder="correo@rally.ar"
+              placeholder="correo@hydropix.ar"
               class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 focus-visible:ring-3"
             />
             <select

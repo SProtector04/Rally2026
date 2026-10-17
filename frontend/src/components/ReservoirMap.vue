@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { LngLatBounds, Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
-import { initMapLibre } from '@/lib/map'
+import { initMapLibre, TERRAIN_STYLE } from '@/lib/map'
+import { LA_MARAVILLA } from '@/data/mock'
 import type { Reading, ReadingStatus, Sensor } from '@/types/api'
 import type { Actuator } from '@/types/domain'
 import { ACTUATOR_STATE, ACTUATOR_TYPE } from '@/lib/device'
@@ -15,6 +16,7 @@ const props = defineProps<{
 const container = ref<HTMLDivElement | null>(null)
 let map: MapLibreMap | null = null
 const markers = new Map<string, { marker: Marker; el: HTMLDivElement }>()
+const SITE_RADIUS_DEG = 0.05
 
 function statusColor(status?: ReadingStatus): string {
   if (status === 'alert') return '#f43f5e'
@@ -84,16 +86,39 @@ function renderMarkers() {
   }
 }
 
+function nearSite(lat?: number | null, lng?: number | null): boolean {
+  if (lat == null || lng == null) return false
+  return (
+    Math.abs(lat - LA_MARAVILLA.lat) <= SITE_RADIUS_DEG &&
+    Math.abs(lng - LA_MARAVILLA.lng) <= SITE_RADIUS_DEG
+  )
+}
+
 function fitToDevices() {
   if (!map) return
   const positioned = [
-    ...props.sensors.filter((s) => s.latitude != null && s.longitude != null),
-    ...props.actuators,
+    ...props.sensors.filter((s) => nearSite(s.latitude, s.longitude)),
+    ...props.actuators.filter((a) => nearSite(a.latitude, a.longitude)),
   ]
   if (positioned.length === 0) return
   const bounds = new LngLatBounds()
   for (const d of positioned) bounds.extend([d.longitude!, d.latitude!])
-  map.fitBounds(bounds, { padding: 60, maxZoom: 15 })
+  map.fitBounds(bounds, { padding: 60, maxZoom: 16 })
+}
+
+function addSiteMarker(target: MapLibreMap) {
+  const el = document.createElement('div')
+  el.textContent = LA_MARAVILLA.name
+  el.style.cssText =
+    'padding:2px 10px;border-radius:999px;background:#3c8ca7;color:#fff;font-size:11px;font-weight:600;white-space:nowrap;border:1px solid rgba(255,255,255,0.85);box-shadow:0 1px 4px rgba(0,0,0,0.35)'
+  new Marker({ element: el })
+    .setLngLat([LA_MARAVILLA.lng, LA_MARAVILLA.lat])
+    .setPopup(
+      new Popup({ offset: 15 }).setHTML(
+        `<strong>Micropresa ${LA_MARAVILLA.name}</strong><br/><span>${LA_MARAVILLA.lat.toFixed(5)}, ${LA_MARAVILLA.lng.toFixed(5)}</span>`,
+      ),
+    )
+    .addTo(target)
 }
 
 onMounted(() => {
@@ -101,10 +126,11 @@ onMounted(() => {
   initMapLibre()
   map = new MapLibreMap({
     container: container.value,
-    style: 'https://demotiles.maplibre.org/style.json',
-    center: [-64.18, -31.42],
-    zoom: 13,
+    style: TERRAIN_STYLE,
+    center: [LA_MARAVILLA.lng, LA_MARAVILLA.lat],
+    zoom: 15,
   })
+  addSiteMarker(map)
   renderMarkers()
   fitToDevices()
 })

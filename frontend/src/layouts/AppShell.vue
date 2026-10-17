@@ -62,7 +62,7 @@ const initials = computed(() => {
 function applyTheme(dark: boolean) {
   isDark.value = dark
   document.documentElement.classList.toggle('dark', dark)
-  localStorage.setItem('rally.theme', dark ? 'dark' : 'light')
+  localStorage.setItem('hydropix.theme', dark ? 'dark' : 'light')
 }
 
 function toggleTheme() {
@@ -76,7 +76,7 @@ function logout() {
 }
 
 onMounted(() => {
-  const saved = localStorage.getItem('rally.theme')
+  const saved = localStorage.getItem('hydropix.theme')
   applyTheme(saved === 'dark')
 })
 
@@ -85,8 +85,8 @@ watch(
   () => {
     open.value = false
     document.title = route.meta.title
-      ? `${route.meta.title} · Rally2026`
-      : 'Rally2026'
+      ? `${route.meta.title} · Hydropix`
+      : 'Hydropix'
   },
   { immediate: true },
 )
@@ -115,7 +115,7 @@ watch(
           <Leaf class="size-5" />
         </div>
         <div class="flex-1">
-          <p class="text-base font-semibold leading-tight tracking-tight">Rally2026</p>
+          <p class="text-base font-semibold leading-tight tracking-tight">Hydropix</p>
           <p class="text-xs text-muted-foreground">Monitoreo del reservorio</p>
         </div>
         <button
@@ -195,7 +195,7 @@ watch(
           >
             <Leaf class="size-4" />
           </div>
-          <span class="font-semibold tracking-tight">Rally2026</span>
+          <span class="font-semibold tracking-tight">Hydropix</span>
         </div>
         <div class="ml-auto flex items-center gap-1">
           <button

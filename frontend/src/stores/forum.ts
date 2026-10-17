@@ -3,8 +3,8 @@ import { defineStore } from 'pinia'
 import type { ForumPost, Poll, PostType } from '@/types/domain'
 import { seedPosts, seedPolls } from '@/data/mock'
 
-const POSTS_KEY = 'rally.forum.posts'
-const POLLS_KEY = 'rally.forum.polls'
+const POSTS_KEY = 'hydropix.forum.posts'
+const POLLS_KEY = 'hydropix.forum.polls'
 
 function load<T>(key: string, seed: T[]): T[] {
   try {

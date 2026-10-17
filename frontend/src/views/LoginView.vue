@@ -39,7 +39,7 @@ function quickLogin(demoEmail: string) {
         <div class="flex size-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
           <Leaf class="size-5" />
         </div>
-        <span class="text-xl font-semibold tracking-tight">Rally2026</span>
+        <span class="text-xl font-semibold tracking-tight">Hydropix</span>
       </div>
       <div class="max-w-md">
         <h1 class="text-4xl font-bold leading-tight tracking-tight">
@@ -60,7 +60,7 @@ function quickLogin(demoEmail: string) {
           >
             <Leaf class="size-5" />
           </div>
-          <span class="text-xl font-semibold tracking-tight">Rally2026</span>
+          <span class="text-xl font-semibold tracking-tight">Hydropix</span>
         </div>
 
         <h2 class="text-2xl font-bold tracking-tight">Iniciar sesión</h2>
@@ -112,19 +112,19 @@ function quickLogin(demoEmail: string) {
           <div class="grid grid-cols-2 gap-3">
             <button
               class="flex flex-col items-center gap-1 rounded-xl border bg-card px-3 py-4 text-sm ring-1 ring-border transition-shadow hover:shadow-sm"
-              @click="quickLogin('admin@rally.ar')"
+              @click="quickLogin('admin@hydropix.ar')"
             >
               <ShieldCheck class="size-5 text-primary" />
               <span class="font-medium">Administrador</span>
-              <span class="text-xs text-muted-foreground">admin@rally.ar</span>
+              <span class="text-xs text-muted-foreground">admin@hydropix.ar</span>
             </button>
             <button
               class="flex flex-col items-center gap-1 rounded-xl border bg-card px-3 py-4 text-sm ring-1 ring-border transition-shadow hover:shadow-sm"
-              @click="quickLogin('voluntario@rally.ar')"
+              @click="quickLogin('voluntario@hydropix.ar')"
             >
               <UserRound class="size-5 text-emerald-500" />
               <span class="font-medium">Voluntario</span>
-              <span class="text-xs text-muted-foreground">voluntario@rally.ar</span>
+              <span class="text-xs text-muted-foreground">voluntario@hydropix.ar</span>
             </button>
           </div>
         </div>

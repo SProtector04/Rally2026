@@ -1,10 +1,14 @@
-# Rally2026
+# Hydropix
 
 Real-time sensor monitoring platform. Sensors are wired to microcontrollers that
 publish JSON readings over MQTT; the backend ingests them, analyzes risks and
 conditions against per-sensor thresholds, persists to PostgreSQL, fans out through
 Redis pub/sub, and streams to the browser over WebSockets. The Vue client renders a
 live map and reading charts.
+
+The backend is a single FastAPI project organized **Django-style**: the business logic
+lives in eight self-contained apps under `apps/`, each with its own models, schemas,
+views, URLs and services, wired together by the `config/` project package.
 
 ## Stack
 
@@ -22,67 +26,69 @@ live map and reading charts.
 ## Architecture
 
 ```
-Sensors ──▶ microcontrollers ──MQTT──▶ mosquitto ──▶ FastAPI (aiomqtt ingest)
-                                                        │  classify (risk/condition)
-                                                        │  persist
-                                                        ▼
-                                                     PostgreSQL
-                                                        │  publish "readings"
-                                                        ▼
-                                                      Redis ──▶ WebSocket bridge ──▶ Vue client (map + chart)
+Sensors ──▶ microcontrollers ──MQTT──▶ mosquitto ──▶ apps.ingestion (aiomqtt intake)
+                                                         │  apps.validation   (normalize/validate)
+                                                         │  apps.rules        (classify risk/condition)
+                                                         │  apps.persistence  (save reading)
+                                                         ▼
+                                                      PostgreSQL
+                                                         │  publish "readings"
+                                                         ▼
+                                                       Redis ──▶ apps.realtime ──WebSocket──▶ Vue client (map + chart)
 ```
 
-The ingest looks up the sensor, classifies the reading (`ok` / `warning` / `alert`)
-against its configured thresholds, persists it, and re-publishes it (with `id`, `status`
-and `timestamp`) to the `readings` Redis channel. The WebSocket bridge forwards it to
-every connected browser.
+The ingest pipeline runs inside the process: `apps.ingestion.mqtt` feeds
+`apps.ingestion.services.process_reading`, which chains validation → identity lookup →
+rules → persistence → Redis fan-out. `apps.realtime` bridges the Redis channel to every
+connected browser over `/ws/readings`.
 
-## Backend subsystems
+## Backend apps
 
-Business logic is divided into eight bounded contexts under `app/subsystems/`:
+One Django-style app per bounded context, all under `apps/`:
 
-| # | Subsystem   | Responsibility                                                      | Status        |
-| - | ----------- | ------------------------------------------------------------------- | ------------- |
-| 1 | ingestion   | Device management; MQTT intake of telemetry, actuator states, events | Implemented   |
-| 2 | validation  | Identity, permissions, units, timestamps, duplicates, plausibility   | Partial       |
-| 3 | persistence | History, current state, traceability (PostgreSQL)                    | Implemented   |
-| 4 | rules       | Alerts, anomalies, hydraulic risk, operational policies              | Partial       |
-| 5 | commands    | Authorize, schedule, verify actuator orders                          | Stub          |
-| 6 | community   | Roles, tasks, shifts, voting, maintenance                            | Stub          |
-| 7 | realtime    | Fan-out of updates/alarms/state changes to authorized clients        | Implemented   |
-| 8 | audit       | Decisions, errors, latencies, orders, confirmations                  | Stub          |
+| # | App         | Responsibility                                                      | Status      |
+| - | ----------- | ------------------------------------------------------------------- | ----------- |
+| 1 | ingestion   | Device management; MQTT intake of telemetry, actuator states, events | Implemented |
+| 2 | validation  | Identity, permissions, units, timestamps, duplicates, plausibility   | Partial     |
+| 3 | persistence | History, current state, traceability (PostgreSQL)                    | Implemented |
+| 4 | rules       | Alerts, anomalies, hydraulic risk, operational policies              | Partial     |
+| 5 | commands    | Authorize, schedule, verify actuator orders                          | Stub        |
+| 6 | community   | Roles, tasks, shifts, voting, maintenance                            | Stub        |
+| 7 | realtime    | Fan-out of updates/alarms/state changes to authorized clients        | Implemented |
+| 8 | audit       | Decisions, errors, latencies, orders, confirmations                  | Stub        |
 
-The ingest pipeline chains the subsystems in order: MQTT → validation →
-identity lookup → rules → persistence → realtime fan-out.
+Apps import each other's models and services directly (like Django apps do); there is
+no network hop between subsystems.
 
 ## Project layout
 
 ```
-Rally2026/
+Hydropix/
 ├── backend/
-│   ├── app/
-│   │   ├── main.py              # FastAPI app + lifespan
-│   │   ├── core/                # config, redis (cross-cutting infra)
-│   │   ├── db/                  # engine, session, Base
-│   │   ├── subsystems/          # business logic, split into 8 contexts
-│   │   │   ├── ingestion/       # 1. IoT device management + MQTT intake
-│   │   │   ├── validation/      # 2. identity/plausibility checks + normalization
-│   │   │   ├── persistence/     # 3. history, current state, traceability
-│   │   │   ├── rules/           # 4. alerts, anomalies, hydraulic risk
-│   │   │   ├── commands/        # 5. actuator command coordinator (stub)
-│   │   │   ├── community/       # 6. roles, tasks, shifts, votes (stub)
-│   │   │   ├── realtime/        # 7. WebSocket + Redis fan-out
-│   │   │   └── audit/           # 8. observability + audit trail (stub)
-│   │   └── api/                 # router aggregation + health
+│   ├── config/                  # the project package (≈ Django project)
+│   │   ├── main.py              # FastAPI app + lifespan (starts MQTT + WS bridge)
+│   │   ├── settings.py          # env-driven settings (pydantic-settings)
+│   │   ├── urls.py              # project URLconf: includes each app's urls
+│   │   ├── db.py                # engine, session, Base
+│   │   └── redis.py             # Redis client
+│   ├── apps/                    # one app per subsystem (≈ Django apps/)
+│   │   ├── ingestion/           # 1. models, schemas, repository, services, views, urls, mqtt
+│   │   ├── validation/          # 2. services (normalize + validate)
+│   │   ├── persistence/         # 3. models, schemas, repository, views, urls
+│   │   ├── rules/               # 4. classifier, services (classify + stubs)
+│   │   ├── commands/            # 5. services, views, urls (stub)
+│   │   ├── community/           # 6. services, views, urls (stub)
+│   │   ├── realtime/            # 7. manager, bridge, views, urls (WebSocket)
+│   │   └── audit/               # 8. services, views, urls (stub)
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── frontend/
 │   ├── src/
 │   │   ├── components/          # MapView, ReadingChart, shadcn ui/
-│   │   ├── composables/         # useReadings (WebSocket)
+│   │   ├── composables/         # useSensors, useReadings (WebSocket), useReadingsHistory
 │   │   ├── lib/                 # API client
 │   │   ├── types/               # shared TS types
-│   │   └── views/               # HomeView (dashboard)
+│   │   └── views/               # landing, dashboard, histórico, permisos, perfil, foro, reservorio
 │   ├── Dockerfile
 │   └── nginx.conf               # serves SPA + proxies /api and /ws
 ├── mosquitto/config/            # broker config (anonymous, port 1883)
@@ -116,7 +122,7 @@ python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-uvicorn app.main:app --reload
+uvicorn config.main:app --reload
 ```
 
 Frontend:
@@ -141,18 +147,15 @@ to `/ws/readings`.
 
 ## REST API
 
-- `GET  /api/health`
-- `GET  /api/sensors`
-- `POST /api/sensors`
-- `GET  /api/sensors/{id}`
-- `GET  /api/readings?sensor_id=...&limit=...`
-- `POST /api/readings`
+- `GET  /api/health` (config)
+- `GET  /api/sensors`, `POST /api/sensors`, `GET /api/sensors/{id}` (ingestion)
+- `GET  /api/readings?sensor_id=...&limit=...`, `POST /api/readings` (persistence)
 
 Stubbed (return `501 Not Implemented`):
 
-- `GET /api/commands`
-- `GET /api/community`
-- `GET /api/audit`
+- `GET /api/commands` (commands)
+- `GET /api/community` (community)
+- `GET /api/audit` (audit)
 
 A sensor payload looks like:
 
@@ -161,8 +164,8 @@ A sensor payload looks like:
   "name": "Boiler temperature",
   "type": "temperature",
   "unit": "°C",
-  "latitude": -31.42,
-  "longitude": -64.18,
+  "latitude": 12.128772951717632,
+  "longitude": -86.18159277757499,
   "low_threshold": 5,
   "high_threshold": 80
 }
@@ -177,6 +180,9 @@ A sensor payload looks like:
 - `create-vue` pins TypeScript `~6.0.0` (not the native `7.x`) for `vue-tsc`
   compatibility — kept as-is.
 - `shadcn-vue` uses `reka-ui` as its headless component base.
+- Django-style app split: `views.py` holds the FastAPI handlers, `urls.py` holds the
+  routing (`APIRouter.add_api_route`), `services.py` holds business logic — so the
+  layout is recognizable to anyone coming from Django.
 
 ## Next steps
 
