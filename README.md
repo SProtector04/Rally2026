@@ -112,6 +112,25 @@ docker compose up --build
 | Redis     | localhost:6379         |
 | MQTT      | localhost:1883         |
 
+### Development with Docker (hot reload)
+
+The default compose builds a production bundle served by nginx. To develop with
+live reload (Vite HMR on the frontend, `uvicorn --reload` on the backend) without
+rebuilding images on every change, stack the dev override:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+| Service  | URL                   |
+| -------- | --------------------- |
+| Frontend | http://localhost:5173 |
+| API docs | http://localhost:8000/docs |
+
+Source is bind-mounted into both containers, so edits to `frontend/src` and
+`backend/apps` reflect immediately. File watching uses polling
+(`CHOKIDAR_USEPOLLING`, `WATCHFILES_FORCE_POLLING`) for Windows/Docker Desktop.
+
 ## Run locally (development)
 
 Backend:

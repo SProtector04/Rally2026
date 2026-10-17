@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Bell, CalendarDays, Clock, MapPin, Plus, Trash2 } from '@lucide/vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DAY_LABELS } from '@/data/mock'
 import { useAuthStore } from '@/stores/auth'
@@ -45,12 +48,9 @@ function entriesForDay(d: number) {
 
 <template>
   <div class="space-y-6">
-    <div>
-      <h1 class="text-2xl font-semibold tracking-tight">Mi perfil</h1>
-      <p class="text-sm text-muted-foreground">
-        Horarios de trabajo y preferencias de alertas.
-      </p>
-    </div>
+    <PageHeader title="Mi perfil">
+      <template #description>Horarios de trabajo y preferencias de alertas.</template>
+    </PageHeader>
 
     <Card>
       <CardContent class="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -77,7 +77,7 @@ function entriesForDay(d: number) {
     </Card>
 
     <Card>
-      <CardHeader class="flex-row items-center justify-between">
+      <CardHeader>
         <CardTitle class="flex items-center gap-2">
           <CalendarDays class="size-4 text-primary" />
           Horarios de trabajo
@@ -123,15 +123,15 @@ function entriesForDay(d: number) {
           <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
             <select
               v-model="day"
-              class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 focus-visible:ring-3"
+              class="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 focus-visible:ring-3"
             >
               <option v-for="(label, d) in DAY_LABELS" :key="label" :value="d">{{ label }}</option>
             </select>
-            <input v-model="start" type="time" class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 focus-visible:ring-3" />
-            <input v-model="end" type="time" class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 focus-visible:ring-3" />
-            <input v-model="task" type="text" placeholder="Tarea" class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 focus-visible:ring-3" />
-            <input v-model="location" type="text" placeholder="Ubicación" class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 focus-visible:ring-3" />
-            <Button @click="addEntry">
+            <Input v-model="start" type="time" />
+            <Input v-model="end" type="time" />
+            <Input v-model="task" type="text" placeholder="Tarea" />
+            <Input v-model="location" type="text" placeholder="Ubicación" />
+            <Button size="lg" @click="addEntry">
               <Plus class="size-4" />
               Agregar
             </Button>
@@ -157,17 +157,11 @@ function entriesForDay(d: number) {
             <p class="text-sm font-medium">{{ pref.label }}</p>
             <p class="text-xs text-muted-foreground">{{ pref.description }}</p>
           </div>
-          <button
-            class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors"
-            :class="pref.enabled ? 'bg-emerald-500' : 'bg-muted'"
+          <Switch
+            :model-value="pref.enabled"
             :aria-label="pref.label"
-            @click="profile.toggleAlert(pref.id)"
-          >
-            <span
-              class="inline-block size-5 transform rounded-full bg-white shadow transition-transform"
-              :class="pref.enabled ? 'translate-x-5' : 'translate-x-0.5'"
-            />
-          </button>
+            @update:model-value="profile.toggleAlert(pref.id)"
+          />
         </div>
       </CardContent>
     </Card>

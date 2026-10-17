@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from 'chart.js'
 import type { Reading, Sensor } from '@/types/api'
+import { CHART_PALETTE } from '@/lib/status'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip)
 
@@ -19,15 +20,13 @@ const props = defineProps<{
   sensors: Sensor[]
 }>()
 
-const PALETTE = ['#3b82f6', '#22c55e', '#f59e0b', '#e11d48', '#8b5cf6']
-
 function sensorName(id: string): string {
   return props.sensors.find((s) => s.id === id)?.name ?? id.slice(0, 8)
 }
 
 function sensorColor(id: string): string {
   const index = props.sensors.findIndex((s) => s.id === id)
-  return PALETTE[Math.max(0, index) % PALETTE.length]!
+  return CHART_PALETTE[Math.max(0, index) % CHART_PALETTE.length]!
 }
 
 const chartData = computed(() => {

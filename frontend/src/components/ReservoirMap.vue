@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { LngLatBounds, Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
+import type { GeoJSONSource } from 'maplibre-gl'
 import { initMapLibre, TERRAIN_STYLE } from '@/lib/map'
 import { LA_MARAVILLA } from '@/data/mock'
-import type { Reading, ReadingStatus, Sensor } from '@/types/api'
+import { statusFill } from '@/lib/status'
+import type { Reading, Sensor } from '@/types/api'
 import type { Actuator } from '@/types/domain'
 import { ACTUATOR_STATE, ACTUATOR_TYPE } from '@/lib/device'
 
@@ -17,13 +19,6 @@ const container = ref<HTMLDivElement | null>(null)
 let map: MapLibreMap | null = null
 const markers = new Map<string, { marker: Marker; el: HTMLDivElement }>()
 const SITE_RADIUS_DEG = 0.05
-
-function statusColor(status?: ReadingStatus): string {
-  if (status === 'alert') return '#f43f5e'
-  if (status === 'warning') return '#f59e0b'
-  if (status === 'ok') return '#10b981'
-  return '#64748b'
-}
 
 function createSensorDot(color: string): HTMLDivElement {
   const el = document.createElement('div')
@@ -49,7 +44,8 @@ function createActuatorDiamond(color: string, letter: string): HTMLDivElement {
 
 function sensorPopup(sensor: Sensor, reading?: Reading): string {
   const state = reading ? `${reading.value} ${sensor.unit} (${reading.status})` : 'Sin datos'
-  return `<strong>${sensor.name}</strong><br/><span>SENSOR · ${sensor.type}</span><br/><span>${state}</span>`
+  const zone = sensor.zone ? `<br/><span>ZONA: ${sensor.zone}</span>` : ''
+  return `<strong>${sensor.name}</strong><br/><span>SENSOR · ${sensor.type}</span>${zone}<br/><span>${state}</span>`
 }
 
 function actuatorPopup(actuator: Actuator): string {
@@ -65,7 +61,7 @@ function renderMarkers() {
   for (const sensor of props.sensors) {
     if (sensor.latitude == null || sensor.longitude == null) continue
     const reading = props.latest[sensor.id]
-    const el = createSensorDot(statusColor(reading?.status))
+    const el = createSensorDot(statusFill(reading?.status))
     const marker = new Marker({ element: el })
       .setLngLat([sensor.longitude, sensor.latitude])
       .setPopup(new Popup({ offset: 15 }).setHTML(sensorPopup(sensor, reading)))
@@ -83,6 +79,55 @@ function renderMarkers() {
       .setPopup(new Popup({ offset: 15 }).setHTML(actuatorPopup(actuator)))
       .addTo(map)
     markers.set(`a-${actuator.id}`, { marker, el })
+  }
+}
+
+function buildZoneGeoJSON(): GeoJSON.FeatureCollection {
+  const zones = new Map<string, { lat: number; lng: number }[]>()
+  for (const s of props.sensors) {
+    if (!s.zone || s.latitude == null || s.longitude == null) continue
+    if (!zones.has(s.zone)) zones.set(s.zone, [])
+    zones.get(s.zone)!.push({ lat: s.latitude, lng: s.longitude })
+  }
+
+  const features: GeoJSON.Feature[] = []
+  for (const [zone, points] of zones) {
+    if (points.length < 2) continue
+    const center = points.reduce(
+      (acc, p) => ({ lat: acc.lat + p.lat / points.length, lng: acc.lng + p.lng / points.length }),
+      { lat: 0, lng: 0 },
+    )
+    const sorted = [...points].sort((a, b) => Math.atan2(a.lat - center.lat, a.lng - center.lng) - Math.atan2(b.lat - center.lat, b.lng - center.lng))
+    const coords = sorted.map((p) => [p.lng, p.lat])
+    coords.push(coords[0])
+    features.push({
+      type: 'Feature',
+      properties: { zone },
+      geometry: { type: 'LineString', coordinates: coords },
+    })
+  }
+  return { type: 'FeatureCollection', features }
+}
+
+function renderZoneLines() {
+  if (!map) return
+  const source = map.getSource('zone-lines') as GeoJSONSource | undefined
+  const geojson = buildZoneGeoJSON()
+  if (source) {
+    source.setData(geojson)
+  } else {
+    map.addSource('zone-lines', { type: 'geojson', data: geojson })
+    map.addLayer({
+      id: 'zone-lines',
+      type: 'line',
+      source: 'zone-lines',
+      paint: {
+        'line-color': '#a0a0a0',
+        'line-width': 2,
+        'line-dasharray': [4, 3],
+        'line-opacity': 0.55,
+      },
+    })
   }
 }
 
@@ -130,17 +175,22 @@ onMounted(() => {
     center: [LA_MARAVILLA.lng, LA_MARAVILLA.lat],
     zoom: 15,
   })
-  addSiteMarker(map)
-  renderMarkers()
-  fitToDevices()
+  map.on('load', () => {
+    addSiteMarker(map!)
+    renderMarkers()
+    renderZoneLines()
+    fitToDevices()
+  })
 })
 
 watch(() => props.sensors, () => {
   renderMarkers()
+  renderZoneLines()
   fitToDevices()
 })
 watch(() => props.actuators, () => {
   renderMarkers()
+  renderZoneLines()
   fitToDevices()
 })
 watch(
@@ -148,7 +198,7 @@ watch(
   () => {
     for (const [sensorId, { el }] of markers.entries()) {
       if (sensorId.startsWith('a-')) continue
-      el.style.background = statusColor(props.latest[sensorId]?.status)
+      el.style.background = statusFill(props.latest[sensorId]?.status)
     }
   },
   { deep: true },

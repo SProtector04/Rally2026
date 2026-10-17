@@ -2,11 +2,16 @@
 import { computed, onMounted, ref } from 'vue'
 import { Check, Download, Pencil, Search, Trash2, X } from '@lucide/vue'
 import StatusBadge from '@/components/StatusBadge.vue'
+import PageHeader from '@/components/PageHeader.vue'
+import DemoBadge from '@/components/DemoBadge.vue'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
 import { useSensors } from '@/composables/useSensors'
 import { useReadingsHistory } from '@/composables/useReadingsHistory'
 import { downloadTablePdf } from '@/lib/pdf'
+import { STATUS_LABEL } from '@/lib/status'
 import { useAuthStore } from '@/stores/auth'
 import type { ReadingStatus } from '@/types/api'
 
@@ -68,12 +73,6 @@ const filteredRows = computed(() =>
   }),
 )
 
-const statusLabel: Record<ReadingStatus, string> = {
-  ok: 'Normal',
-  warning: 'Atención',
-  alert: 'Alerta',
-}
-
 function startEdit(row: Row) {
   editingId.value = row.id
   editValue.value = row.value
@@ -114,7 +113,7 @@ function downloadPdf() {
       formatTimestamp(r.timestamp),
       r.sensorName,
       `${r.value} ${r.unit}`,
-      statusLabel[r.status],
+      STATUS_LABEL[r.status],
     ]),
     'registro-historico.pdf',
     { statusColumn: 3 },
@@ -129,68 +128,49 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Registro histórico</h1>
-        <p class="text-sm text-muted-foreground">
-          Data conservada de las lecturas del reservorio.
-          <template v-if="isAdmin">Podés editar y corregir los registros.</template>
-          <template v-else>Acceso de solo lectura.</template>
-        </p>
-      </div>
-      <div class="flex items-center gap-3">
-        <span
-          v-if="isDemo"
-          class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
-        >
-          Modo demo · sin backend
-        </span>
-        <Button variant="outline" @click="downloadPdf">
-          <Download class="size-4" />
-          Descargar PDF
-        </Button>
-      </div>
-    </div>
+    <PageHeader title="Registro histórico">
+      <template #description>
+        Data conservada de las lecturas del reservorio.
+        <template v-if="isAdmin">Podés editar y corregir los registros.</template>
+        <template v-else>Acceso de solo lectura.</template>
+      </template>
+      <DemoBadge v-if="isDemo" />
+      <Button variant="outline" size="lg" @click="downloadPdf">
+        <Download class="size-4" />
+        Descargar PDF
+      </Button>
+    </PageHeader>
 
     <Card>
       <CardContent class="space-y-4">
         <div class="grid gap-3 md:grid-cols-3">
           <div class="relative">
             <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              v-model="search"
-              type="text"
-              placeholder="Buscar por sensor…"
-              class="h-10 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm outline-none ring-ring/50 focus-visible:ring-3"
-            />
+            <Input v-model="search" type="text" placeholder="Buscar por sensor…" class="pl-9" />
           </div>
-          <select
-            v-model="sensorFilter"
-            class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 focus-visible:ring-3"
-          >
+          <Select v-model="sensorFilter">
             <option value="all">Todos los sensores</option>
             <option v-for="s in sensorOptions" :key="s.id" :value="s.id">{{ s.name }}</option>
-          </select>
-          <select
-            v-model="statusFilter"
-            class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 focus-visible:ring-3"
-          >
+          </Select>
+          <Select v-model="statusFilter">
             <option value="all">Todos los estados</option>
             <option value="ok">Normal</option>
             <option value="warning">Atención</option>
             <option value="alert">Alerta</option>
-          </select>
+          </Select>
         </div>
 
         <div class="overflow-x-auto rounded-lg border">
           <table class="w-full text-sm">
             <thead>
-              <tr class="border-b bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground">
-                <th class="px-4 py-3 font-medium">Fecha y hora</th>
-                <th class="px-4 py-3 font-medium">Sensor</th>
-                <th class="px-4 py-3 font-medium">Valor</th>
-                <th class="px-4 py-3 font-medium">Estado</th>
-                <th v-if="isAdmin" class="px-4 py-3 text-right font-medium">Acciones</th>
+              <tr class="border-b bg-muted/50 text-left text-xs text-muted-foreground">
+                <th scope="col" class="px-4 py-3 font-medium">Fecha y hora</th>
+                <th scope="col" class="px-4 py-3 font-medium">Sensor</th>
+                <th scope="col" class="px-4 py-3 font-medium">Valor</th>
+                <th scope="col" class="px-4 py-3 font-medium">Estado</th>
+                <th v-if="isAdmin" scope="col" class="px-4 py-3 text-right font-medium">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -199,11 +179,11 @@ onMounted(async () => {
                 :key="row.id"
                 class="border-b last:border-0 hover:bg-muted/30"
               >
-                <td class="px-4 py-3 whitespace-nowrap text-muted-foreground">
+                <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">
                   {{ formatTimestamp(row.timestamp) }}
                 </td>
                 <td class="px-4 py-3 font-medium">{{ row.sensorName }}</td>
-                <td class="px-4 py-3 whitespace-nowrap">
+                <td class="whitespace-nowrap px-4 py-3">
                   <template v-if="editingId === row.id">
                     <input
                       v-model.number="editValue"
@@ -218,14 +198,11 @@ onMounted(async () => {
                 </td>
                 <td class="px-4 py-3">
                   <template v-if="editingId === row.id">
-                    <select
-                      v-model="editStatus"
-                      class="h-8 rounded-md border border-input bg-background px-2 text-sm outline-none ring-ring/50 focus-visible:ring-3"
-                    >
+                    <Select v-model="editStatus" class="h-8">
                       <option value="ok">Normal</option>
                       <option value="warning">Atención</option>
                       <option value="alert">Alerta</option>
-                    </select>
+                    </Select>
                   </template>
                   <template v-else>
                     <StatusBadge :status="row.status" />

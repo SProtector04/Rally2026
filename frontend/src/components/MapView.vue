@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { LngLatBounds, Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
+import type { GeoJSONSource } from 'maplibre-gl'
 import { initMapLibre, TERRAIN_STYLE } from '@/lib/map'
 import { LA_MARAVILLA } from '@/data/mock'
-import type { Reading, ReadingStatus, Sensor } from '@/types/api'
+import { statusFill } from '@/lib/status'
+import type { Reading, Sensor } from '@/types/api'
 
 const props = defineProps<{
   sensors: Sensor[]
@@ -14,13 +16,6 @@ const container = ref<HTMLDivElement | null>(null)
 let map: MapLibreMap | null = null
 const markers = new Map<string, { marker: Marker; el: HTMLDivElement }>()
 const SITE_RADIUS_DEG = 0.05
-
-function statusColor(status?: ReadingStatus): string {
-  if (status === 'alert') return '#e11d48'
-  if (status === 'warning') return '#f59e0b'
-  if (status === 'ok') return '#22c55e'
-  return '#64748b'
-}
 
 function createDot(color: string): HTMLDivElement {
   const el = document.createElement('div')
@@ -41,7 +36,7 @@ function renderMarkers() {
   for (const sensor of props.sensors) {
     if (sensor.latitude == null || sensor.longitude == null) continue
     const reading = props.latest[sensor.id]
-    const el = createDot(statusColor(reading?.status))
+    const el = createDot(statusFill(reading?.status))
     const popupText = reading
       ? `${sensor.name} — ${reading.value} ${sensor.unit} (${reading.status})`
       : `${sensor.name} — no data`
@@ -53,9 +48,58 @@ function renderMarkers() {
   }
 }
 
+function buildZoneGeoJSON(): GeoJSON.FeatureCollection {
+  const zones = new Map<string, { lat: number; lng: number }[]>()
+  for (const s of props.sensors) {
+    if (!s.zone || s.latitude == null || s.longitude == null) continue
+    if (!zones.has(s.zone)) zones.set(s.zone, [])
+    zones.get(s.zone)!.push({ lat: s.latitude, lng: s.longitude })
+  }
+
+  const features: GeoJSON.Feature[] = []
+  for (const [zone, points] of zones) {
+    if (points.length < 2) continue
+    const center = points.reduce(
+      (acc, p) => ({ lat: acc.lat + p.lat / points.length, lng: acc.lng + p.lng / points.length }),
+      { lat: 0, lng: 0 },
+    )
+    const sorted = [...points].sort((a, b) => Math.atan2(a.lat - center.lat, a.lng - center.lng) - Math.atan2(b.lat - center.lat, b.lng - center.lng))
+    const coords = sorted.map((p) => [p.lng, p.lat])
+    coords.push(coords[0])
+    features.push({
+      type: 'Feature',
+      properties: { zone },
+      geometry: { type: 'LineString', coordinates: coords },
+    })
+  }
+  return { type: 'FeatureCollection', features }
+}
+
+function renderZoneLines() {
+  if (!map) return
+  const source = map.getSource('zone-lines') as GeoJSONSource | undefined
+  const geojson = buildZoneGeoJSON()
+  if (source) {
+    source.setData(geojson)
+  } else {
+    map.addSource('zone-lines', { type: 'geojson', data: geojson })
+    map.addLayer({
+      id: 'zone-lines',
+      type: 'line',
+      source: 'zone-lines',
+      paint: {
+        'line-color': '#a0a0a0',
+        'line-width': 2,
+        'line-dasharray': [4, 3],
+        'line-opacity': 0.55,
+      },
+    })
+  }
+}
+
 function updateMarkerColors() {
   for (const [sensorId, { el }] of markers.entries()) {
-    el.style.backgroundColor = statusColor(props.latest[sensorId]?.status)
+    el.style.backgroundColor = statusFill(props.latest[sensorId]?.status)
   }
 }
 
@@ -100,15 +144,19 @@ onMounted(() => {
     center: [LA_MARAVILLA.lng, LA_MARAVILLA.lat],
     zoom: 15,
   })
-  addSiteMarker(map)
-  renderMarkers()
-  fitToSensors()
+  map.on('load', () => {
+    addSiteMarker(map!)
+    renderMarkers()
+    renderZoneLines()
+    fitToSensors()
+  })
 })
 
 watch(
   () => props.sensors,
   () => {
     renderMarkers()
+    renderZoneLines()
     fitToSensors()
   },
 )

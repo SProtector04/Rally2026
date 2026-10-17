@@ -9,7 +9,7 @@ export interface User {
   joinedAt: string
 }
 
-export type ActuatorType = 'valve' | 'pump' | 'gate' | 'aerator'
+export type ActuatorType = 'pump' | 'gate'
 export type ActuatorState = 'active' | 'idle' | 'error'
 
 export interface Actuator {

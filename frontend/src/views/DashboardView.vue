@@ -13,11 +13,16 @@ import {
 import { Activity, AlertTriangle, CircleCheck, Gauge, Waves } from '@lucide/vue'
 import MapView from '@/components/MapView.vue'
 import ReadingChart from '@/components/ReadingChart.vue'
+import PageHeader from '@/components/PageHeader.vue'
+import DemoBadge from '@/components/DemoBadge.vue'
+import ConnectionBadge from '@/components/ConnectionBadge.vue'
+import KpiCard from '@/components/KpiCard.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSensors } from '@/composables/useSensors'
 import { useReadingsHistory } from '@/composables/useReadingsHistory'
 import { useReadings } from '@/composables/useReadings'
 import { latestBySensor } from '@/lib/readings'
+import { CHART_PALETTE, STATUS_META } from '@/lib/status'
 
 ChartJS.register(CategoryScale, LinearScale, ArcElement, BarElement, Legend, Tooltip)
 
@@ -36,11 +41,15 @@ const availability = computed(() =>
 )
 
 const doughnutData = computed(() => ({
-  labels: ['Normal', 'Atención', 'Alerta'],
+  labels: [STATUS_META.ok.label, STATUS_META.warning.label, STATUS_META.alert.label],
   datasets: [
     {
       data: [ok.value.length, warnings.value.length, alerts.value.length],
-      backgroundColor: ['#34d399', '#fbbf24', '#fb7185'],
+      backgroundColor: [
+        STATUS_META.ok.fill,
+        STATUS_META.warning.fill,
+        STATUS_META.alert.fill,
+      ],
       borderWidth: 0,
     },
   ],
@@ -66,7 +75,7 @@ const readingsBySensor = computed(() => {
       {
         label: 'Lecturas',
         data: counts.map((c) => c.count),
-        backgroundColor: ['#38bdf8', '#34d399', '#2dd4bf', '#0ea5e9', '#4ade80', '#22d3ee'],
+        backgroundColor: CHART_PALETTE,
         borderRadius: 6,
       },
     ],
@@ -89,7 +98,7 @@ const kpis = computed(() => [
     label: 'Sensores activos',
     value: sensors.value.length,
     icon: Gauge,
-    tone: 'text-sky-500 bg-sky-500/10',
+    tone: 'text-primary bg-primary/10',
   },
   {
     label: 'En alerta',
@@ -120,55 +129,21 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Monitoreo del reservorio</h1>
-        <p class="text-sm text-muted-foreground">
-          Lecturas en tiempo real clasificadas por umbrales.
-        </p>
-      </div>
-      <div class="flex items-center gap-3">
-        <span
-          v-if="isDemo"
-          class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
-        >
-          Modo demo · sin backend
-        </span>
-        <span
-          class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium"
-          :class="
-            connected
-              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
-              : 'bg-muted text-muted-foreground'
-          "
-        >
-          <span class="relative flex size-2">
-            <span
-              v-if="connected"
-              class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"
-            />
-            <span
-              class="relative inline-flex size-2 rounded-full"
-              :class="connected ? 'bg-emerald-500' : 'bg-muted-foreground'"
-            />
-          </span>
-          {{ connected ? 'En línea' : 'Sin conexión en vivo' }}
-        </span>
-      </div>
-    </div>
+    <PageHeader title="Monitoreo del reservorio">
+      <template #description>Lecturas en tiempo real clasificadas por umbrales.</template>
+      <DemoBadge v-if="isDemo" />
+      <ConnectionBadge :connected="connected" />
+    </PageHeader>
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <Card v-for="kpi in kpis" :key="kpi.label">
-        <CardContent class="flex items-center gap-4">
-          <div class="flex size-11 shrink-0 items-center justify-center rounded-xl" :class="kpi.tone">
-            <component :is="kpi.icon" class="size-5" />
-          </div>
-          <div class="min-w-0">
-            <p class="text-2xl font-semibold leading-none">{{ kpi.value }}</p>
-            <p class="mt-1 truncate text-sm text-muted-foreground">{{ kpi.label }}</p>
-          </div>
-        </CardContent>
-      </Card>
+      <KpiCard
+        v-for="kpi in kpis"
+        :key="kpi.label"
+        :label="kpi.label"
+        :value="kpi.value"
+        :icon="kpi.icon"
+        :tone="kpi.tone"
+      />
     </div>
 
     <div class="grid gap-4 lg:grid-cols-3">
@@ -205,14 +180,12 @@ onMounted(async () => {
       </Card>
 
       <Card>
-        <CardHeader class="flex-row items-center justify-between">
-          <div>
-            <CardTitle class="flex items-center gap-2">
-              <Waves class="size-4 text-primary" />
-              Lecturas por sensor
-            </CardTitle>
-            <CardDescription>Volumen de muestras registradas</CardDescription>
-          </div>
+        <CardHeader>
+          <CardTitle class="flex items-center gap-2">
+            <Waves class="size-4 text-primary" />
+            Lecturas por sensor
+          </CardTitle>
+          <CardDescription>Volumen de muestras registradas</CardDescription>
         </CardHeader>
         <CardContent class="h-[340px]">
           <Bar :data="readingsBySensor" :options="barOptions" />

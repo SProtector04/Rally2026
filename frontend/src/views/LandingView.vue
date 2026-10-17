@@ -4,12 +4,12 @@ import {
   Activity,
   ArrowRight,
   History,
-  Leaf,
   Map,
   MessagesSquare,
   ShieldCheck,
   User,
 } from '@lucide/vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const features = [
   {
@@ -53,11 +53,12 @@ const features = [
           <div
             class="flex size-9 items-center justify-center rounded-xl bg-gradient-brand text-white"
           >
-            <Leaf class="size-5" />
+            <img src="/HIDROPIX.svg" alt="Hydropix" class="size-5 object-contain" />
           </div>
           <span class="text-lg font-semibold tracking-tight">Hydropix</span>
         </div>
         <nav class="flex items-center gap-2">
+          <ThemeToggle />
           <RouterLink
             to="/login"
             class="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -184,7 +185,7 @@ const features = [
     <footer class="border-t bg-card">
       <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-muted-foreground md:flex-row md:px-6">
         <div class="flex items-center gap-2">
-          <Leaf class="size-4 text-emerald-500" />
+          <img src="/HIDROPIX.svg" alt="Hydropix" class="size-4 object-contain" />
           <span>Hydropix</span>
         </div>
         <p>Plataforma de monitoreo ambiental · 2026</p>

@@ -1,0 +1,27 @@
+# Development override. Run with:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# Frontend runs Vite dev server with hot module reload. Source is bind-mounted
+# so code changes reflect immediately without rebuilding the image. Backend
+# runs uvicorn with --reload and its source bind-mounted too.
+
+services:
+  frontend:
+    build:
+      target: development
+    command: npm run dev -- --host 0.0.0.0
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_PROXY_TARGET: http://backend:8000
+      CHOKIDAR_USEPOLLING: "true"
+
+  backend:
+    command: uvicorn config.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"

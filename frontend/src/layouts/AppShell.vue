@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import {
-  Bell,
   History,
   LayoutDashboard,
-  Leaf,
   LogOut,
   Map,
   Menu,
@@ -17,6 +15,7 @@ import {
   X,
 } from '@lucide/vue'
 import { useAuthStore } from '@/stores/auth'
+import { isDark, toggleTheme } from '@/composables/useTheme'
 import type { Role } from '@/types/domain'
 
 interface NavItem {
@@ -40,7 +39,6 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const open = ref(false)
-const isDark = ref(false)
 
 const items = computed(() => NAV_ITEMS.filter((i) => !i.adminOnly || auth.isAdmin))
 
@@ -59,34 +57,17 @@ const initials = computed(() => {
     .toUpperCase()
 })
 
-function applyTheme(dark: boolean) {
-  isDark.value = dark
-  document.documentElement.classList.toggle('dark', dark)
-  localStorage.setItem('hydropix.theme', dark ? 'dark' : 'light')
-}
-
-function toggleTheme() {
-  applyTheme(!isDark.value)
-}
-
 function logout() {
   auth.logout()
   open.value = false
   router.push({ name: 'login' })
 }
 
-onMounted(() => {
-  const saved = localStorage.getItem('hydropix.theme')
-  applyTheme(saved === 'dark')
-})
-
 watch(
   () => route.fullPath,
   () => {
     open.value = false
-    document.title = route.meta.title
-      ? `${route.meta.title} · Hydropix`
-      : 'Hydropix'
+    document.title = route.meta.title ? `${route.meta.title} · Hydropix` : 'Hydropix'
   },
   { immediate: true },
 )
@@ -104,15 +85,14 @@ watch(
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed inset-y-0 left-0 z-50 flex w-72 transform flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 lg:static lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 lg:static lg:translate-x-0',
         open ? 'translate-x-0' : '-translate-x-full',
       ]"
     >
-      <div class="flex items-center gap-2.5 border-b border-sidebar-border px-5 py-4">
-        <div
-          class="flex size-9 items-center justify-center rounded-xl bg-gradient-brand text-white"
-        >
-          <Leaf class="size-5" />
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5 px-5 py-5">
+        <div class="flex size-9 items-center justify-center rounded-xl bg-gradient-brand text-white">
+          <img src="/HIDROPIX.svg" alt="Hydropix" class="size-5 object-contain" />
         </div>
         <div class="flex-1">
           <p class="text-base font-semibold leading-tight tracking-tight">Hydropix</p>
@@ -127,10 +107,8 @@ watch(
         </button>
       </div>
 
-      <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        <p class="px-3 pb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Navegación
-        </p>
+      <!-- Navigation -->
+      <nav class="flex-1 space-y-1 overflow-y-auto px-3 pb-3">
         <RouterLink
           v-for="item in items"
           :key="item.to"
@@ -143,6 +121,7 @@ watch(
         </RouterLink>
       </nav>
 
+      <!-- User + actions -->
       <div class="border-t border-sidebar-border p-3">
         <div class="flex items-center gap-3 rounded-lg px-2 py-2">
           <div
@@ -180,7 +159,7 @@ watch(
     <!-- Main column -->
     <div class="flex min-h-screen flex-1 flex-col">
       <header
-        class="sticky top-0 z-30 flex items-center gap-3 border-b bg-background/80 px-4 py-3 backdrop-blur lg:hidden"
+        class="sticky top-0 z-30 mx-3 mt-3 flex items-center gap-3 rounded-2xl border border-sidebar-border bg-background/80 px-4 py-3 backdrop-blur lg:hidden"
       >
         <button
           class="rounded-md p-2 text-muted-foreground hover:bg-muted"
@@ -190,23 +169,12 @@ watch(
           <Menu class="size-5" />
         </button>
         <div class="flex items-center gap-2">
-          <div
-            class="flex size-7 items-center justify-center rounded-lg bg-gradient-brand text-white"
-          >
-            <Leaf class="size-4" />
+          <div class="flex size-7 items-center justify-center rounded-lg bg-gradient-brand text-white">
+            <img src="/HIDROPIX.svg" alt="Hydropix" class="size-4 object-contain" />
           </div>
           <span class="font-semibold tracking-tight">Hydropix</span>
         </div>
         <div class="ml-auto flex items-center gap-1">
-          <button
-            class="relative rounded-md p-2 text-muted-foreground hover:bg-muted"
-            aria-label="Notificaciones"
-          >
-            <Bell class="size-5" />
-            <span
-              class="absolute right-1.5 top-1.5 size-2 rounded-full bg-destructive ring-2 ring-background"
-            />
-          </button>
           <div
             class="flex size-8 items-center justify-center rounded-full bg-gradient-brand text-xs font-semibold text-white"
           >

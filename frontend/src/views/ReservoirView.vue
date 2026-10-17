@@ -3,6 +3,8 @@ import { computed, onMounted } from 'vue'
 import { AlertTriangle, CircleDot, Diamond, Radio } from '@lucide/vue'
 import ReservoirMap from '@/components/ReservoirMap.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
+import PageHeader from '@/components/PageHeader.vue'
+import DemoBadge from '@/components/DemoBadge.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSensors } from '@/composables/useSensors'
 import { useReadingsHistory } from '@/composables/useReadingsHistory'
@@ -32,29 +34,17 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Reservorio</h1>
-        <p class="text-sm text-muted-foreground">
-          Ubicación de sensores y actuadores con indicativos visuales.
-        </p>
-      </div>
-      <div class="flex items-center gap-3">
-        <span
-          v-if="isDemo"
-          class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
-        >
-          Modo demo · sin backend
-        </span>
-        <span
-          v-if="alertCount > 0"
-          class="inline-flex items-center gap-2 rounded-full bg-rose-100 px-3 py-1 text-sm font-medium text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
-        >
-          <AlertTriangle class="size-4" />
-          {{ alertCount }} alerta{{ alertCount === 1 ? '' : 's' }} activa{{ alertCount === 1 ? '' : 's' }}
-        </span>
-      </div>
-    </div>
+    <PageHeader title="Reservorio">
+      <template #description>Ubicación de sensores y actuadores con indicativos visuales.</template>
+      <DemoBadge v-if="isDemo" />
+      <span
+        v-if="alertCount > 0"
+        class="inline-flex items-center gap-2 rounded-full bg-rose-100 px-3 py-1 text-sm font-medium text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
+      >
+        <AlertTriangle class="size-4" />
+        {{ alertCount }} alerta{{ alertCount === 1 ? '' : 's' }} activa{{ alertCount === 1 ? '' : 's' }}
+      </span>
+    </PageHeader>
 
     <div class="grid gap-4 lg:grid-cols-3">
       <Card class="lg:col-span-2">

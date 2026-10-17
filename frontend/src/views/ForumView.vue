@@ -9,7 +9,11 @@ import {
   ThumbsUp,
   Vote,
 } from '@lucide/vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuthStore } from '@/stores/auth'
 import { useForumStore } from '@/stores/forum'
@@ -82,12 +86,11 @@ function pollPercent(votes: number, total: number): number {
 
 <template>
   <div class="space-y-6">
-    <div>
-      <h1 class="text-2xl font-semibold tracking-tight">Foro</h1>
-      <p class="text-sm text-muted-foreground">
+    <PageHeader title="Foro">
+      <template #description>
         Coordinación, preguntas y votaciones para la gestión del trabajo.
-      </p>
-    </div>
+      </template>
+    </PageHeader>
 
     <div class="flex gap-1 rounded-lg border bg-muted/40 p-1 sm:w-fit">
       <button
@@ -115,29 +118,16 @@ function pollPercent(votes: number, total: number): number {
         </CardHeader>
         <CardContent class="space-y-3">
           <div class="grid gap-3 md:grid-cols-4">
-            <input
-              v-model="title"
-              type="text"
-              placeholder="Título"
-              class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 md:col-span-3 focus-visible:ring-3"
-            />
-            <select
-              v-model="type"
-              class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 focus-visible:ring-3"
-            >
+            <Input v-model="title" type="text" placeholder="Título" class="md:col-span-3" />
+            <Select v-model="type">
               <option value="proposal">Propuesta</option>
               <option value="qa">Pregunta</option>
               <option value="task">Tarea</option>
-            </select>
+            </Select>
           </div>
-          <textarea
-            v-model="body"
-            rows="3"
-            placeholder="Describí tu propuesta, pregunta o tarea…"
-            class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none ring-ring/50 focus-visible:ring-3"
-          />
+          <Textarea v-model="body" rows="3" placeholder="Describí tu propuesta, pregunta o tarea…" />
           <div class="flex justify-end">
-            <Button @click="createPost">
+            <Button size="lg" @click="createPost">
               <Plus class="size-4" />
               Publicar
             </Button>
@@ -194,20 +184,10 @@ function pollPercent(votes: number, total: number): number {
           <CardTitle>Nueva votación</CardTitle>
         </CardHeader>
         <CardContent class="space-y-3">
-          <input
-            v-model="pollQuestion"
-            type="text"
-            placeholder="Pregunta a votar"
-            class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 focus-visible:ring-3"
-          />
-          <textarea
-            v-model="pollOptions"
-            rows="3"
-            placeholder="Opciones (una por línea)"
-            class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none ring-ring/50 focus-visible:ring-3"
-          />
+          <Input v-model="pollQuestion" type="text" placeholder="Pregunta a votar" />
+          <Textarea v-model="pollOptions" rows="3" placeholder="Opciones (una por línea)" />
           <div class="flex justify-end">
-            <Button @click="createPoll">
+            <Button size="lg" @click="createPoll">
               <Plus class="size-4" />
               Crear votación
             </Button>

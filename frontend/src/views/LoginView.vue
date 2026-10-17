@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { Leaf, LogIn, ShieldCheck, UserRound } from '@lucide/vue'
+import { LogIn, ShieldCheck, UserRound } from '@lucide/vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
@@ -31,13 +34,17 @@ function quickLogin(demoEmail: string) {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col lg:flex-row">
+  <div class="relative flex min-h-screen flex-col lg:flex-row">
+    <div class="absolute right-4 top-4 z-10">
+      <ThemeToggle />
+    </div>
+
     <div
       class="relative hidden flex-1 flex-col justify-between overflow-hidden bg-gradient-hero p-10 text-white lg:flex"
     >
       <div class="flex items-center gap-2.5">
         <div class="flex size-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
-          <Leaf class="size-5" />
+          <img src="/HIDROPIX.svg" alt="Hydropix" class="size-5 object-contain" />
         </div>
         <span class="text-xl font-semibold tracking-tight">Hydropix</span>
       </div>
@@ -55,58 +62,46 @@ function quickLogin(demoEmail: string) {
     <div class="flex flex-1 items-center justify-center px-4 py-10">
       <div class="w-full max-w-sm">
         <div class="mb-8 flex items-center gap-2.5 lg:hidden">
-          <div
-            class="flex size-10 items-center justify-center rounded-xl bg-gradient-brand text-white"
-          >
-            <Leaf class="size-5" />
+          <div class="flex size-10 items-center justify-center rounded-xl bg-gradient-brand text-white">
+            <img src="/HIDROPIX.svg" alt="Hydropix" class="size-5 object-contain" />
           </div>
           <span class="text-xl font-semibold tracking-tight">Hydropix</span>
         </div>
 
         <h2 class="text-2xl font-bold tracking-tight">Iniciar sesión</h2>
-        <p class="mt-1 text-sm text-muted-foreground">
-          Ingresá con tu correo para continuar.
-        </p>
+        <p class="mt-1 text-sm text-muted-foreground">Ingresá con tu correo para continuar.</p>
 
         <form class="mt-6 space-y-4" @submit.prevent="submit">
           <div class="space-y-1.5">
             <label for="email" class="text-sm font-medium">Correo electrónico</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              required
-              placeholder="tu@correo.com"
-              class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 placeholder:text-muted-foreground focus-visible:ring-3"
-            />
+            <Input id="email" v-model="email" type="email" required placeholder="tu@correo.com" />
           </div>
           <div class="space-y-1.5">
             <label for="password" class="text-sm font-medium">Contraseña</label>
-            <input
+            <Input
               id="password"
               v-model="password"
               type="password"
               required
               placeholder="••••••••"
-              class="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none ring-ring/50 placeholder:text-muted-foreground focus-visible:ring-3"
             />
           </div>
 
-          <p v-if="error" class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:bg-rose-500/10 dark:text-rose-300">
+          <p
+            v-if="error"
+            class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:bg-rose-500/10 dark:text-rose-300"
+          >
             {{ error }}
           </p>
 
-          <button
-            type="submit"
-            class="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-          >
+          <Button type="submit" size="lg" class="w-full">
             <LogIn class="size-4" />
             Ingresar
-          </button>
+          </Button>
         </form>
 
         <div class="mt-8">
-          <p class="mb-3 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p class="mb-3 text-center text-xs font-medium text-muted-foreground">
             Cuentas de demostración
           </p>
           <div class="grid grid-cols-2 gap-3">

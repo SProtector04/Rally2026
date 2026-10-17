@@ -47,7 +47,7 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist Variable', sans-serif;
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -90,6 +90,7 @@
  * Hydropix theme — azul acero (steel blue) → aguamarina pizarra → verde vivo.
  */
 :root {
+  color-scheme: light;
   --background: #f1f8f7;
   --foreground: #0f2f2e;
   --card: #ffffff;
@@ -134,6 +135,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: #0b1e1d;
   --foreground: #e7f4f2;
   --card: #11302e;
@@ -180,9 +182,26 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-background text-foreground;
     @apply font-sans;
+  }
+  ::selection {
+    background-color: color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
