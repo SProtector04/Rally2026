@@ -1,0 +1,16 @@
+MONITOREO INTELIGENTE E INFRAESTRUCTURA VERDE EN RESERVORIOS PLUVIALES
+
+Los reservorios pluviales son estructuras o espacios, naturales o artificiales, que almacenan agua de lluvia para regularla, evitar inundaciones y/o reutilizarla. Aquellos en zonas vulnerables sufren anegamientos recurrentes, acumulación de sedimentos y falta de visibilidad o monitoreo en tiempo real para la prevención de inundaciones.
+El desafío consiste en identificar una comunidad urbana o periurbana vulnerable expuesta a riesgos hídricos y diseñar una propuesta integral que combine herramientas de monitoreo de agua con intervenciones de infraestructura verde, fundamentando de qué manera la solución optimiza la respuesta de drenaje, mejora la calidad ambiental y se articula con la gestión comunitaria e institucional.
+
+La propuesta es un "sistema de monitoreo, aprovechamiento y gestión adaptativa de reservorios pluviales existentes"
+
+
+Mi enfoque de software es hacer un saas para jovenes adolescentes y adultos de areas urbanas o periurbanas con roles de voluntarios y administradores a traves de un sitio web interactivo, fluido y dinamico enfocado en latam. Tengo pensado hacer uso de vue + fastapi + postgresql para desarrollar las vistas las cuales seran para:
+1- guardar en digital la data historica que se conserva
+2- un dashboard para monitoreo en comfort
+3- permisos
+4- horarios de trabajo
+5- Foro con opciones de votaciones para gestionamiento de trabajo, q&a.
+6- mapa interactivo de ubicacion de sensores y actuadores con indicativos visuales asi como porcentajes
+
